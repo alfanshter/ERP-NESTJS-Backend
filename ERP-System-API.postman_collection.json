@@ -1,0 +1,755 @@
+{
+  "info": {
+    "name": "ERP System API",
+    "description": "Complete API documentation for ERP Multi-tenant System with Superadmin",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "12345"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3000",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "1. Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"token\", jsonData.access_token);",
+                  "    pm.collectionVariables.set(\"token\", jsonData.access_token);",
+                  "    console.log(\"Token saved:\", jsonData.access_token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"master@erp-system.com\",\n  \"password\": \"MasterAdmin123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login untuk semua role. Credentials:\n- Master: master@erp-system.com / MasterAdmin123!\n- Superadmin: superadmin@erp-system.com / SuperAdmin123!\n- Admin: admin@demo.com / Admin123!"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@company.com\",\n  \"password\": \"Password123!\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"companyId\": \"put-company-uuid-here\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "Register user baru untuk company"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Register Superadmin (Master Only)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newsuperadmin@erp-system.com\",\n  \"password\": \"StrongPassword123!\",\n  \"firstName\": \"New\",\n  \"lastName\": \"Superadmin\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register-superadmin",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register-superadmin"]
+            },
+            "description": "⚠️ Hanya Master Superadmin yang bisa akses endpoint ini!"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "Get detail profile user yang sedang login"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Get Current User (JWT Payload)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/auth/me",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "me"]
+            },
+            "description": "Get JWT payload user"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication endpoints untuk login, register, dan profile"
+    },
+    {
+      "name": "Superadmin - Companies",
+      "item": [
+        {
+          "name": "1. Create Company",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "PT Technology Indonesia",
+                  "type": "text",
+                  "description": "Company name (required)"
+                },
+                {
+                  "key": "email",
+                  "value": "contact@techindo.com",
+                  "type": "text",
+                  "description": "Company email (optional)"
+                },
+                {
+                  "key": "phone",
+                  "value": "+628123456789",
+                  "type": "text",
+                  "description": "Company phone (optional)"
+                },
+                {
+                  "key": "address",
+                  "value": "Jl. Sudirman No. 123, Jakarta Pusat",
+                  "type": "text",
+                  "description": "Company address (optional)"
+                },
+                {
+                  "key": "website",
+                  "value": "https://techindo.com",
+                  "type": "text",
+                  "description": "Company website (optional)"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "type": "text",
+                  "description": "Company status: ACTIVE, TRIAL, SUSPENDED, INACTIVE (optional, default: TRIAL)"
+                },
+                {
+                  "key": "logo",
+                  "type": "file",
+                  "description": "Company logo - PNG/JPEG only, max 1MB (optional)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/companies",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "companies"]
+            },
+            "description": "Create new company with optional logo upload.\n\n**Logo Requirements:**\n- Format: JPEG, PNG only\n- Max Size: 1MB (1048576 bytes)\n- Recommended: 200x200 - 500x500 px, square (1:1)\n- Optional field\n\n**Response will include logo URL** if uploaded:\n```json\n{\n  \"id\": \"uuid\",\n  \"name\": \"PT Technology Indonesia\",\n  \"logo\": \"http://localhost:3000/uploads/logos/logo-1703151234567-987654321.png\",\n  ...\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get All Companies",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/companies?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "companies"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "search",
+                  "value": "demo",
+                  "disabled": true,
+                  "description": "Search by name or email"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "disabled": true,
+                  "description": "Filter by status"
+                }
+              ]
+            },
+            "description": "List semua companies dengan pagination & filter"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Company Stats",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/companies/stats",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "companies", "stats"]
+            },
+            "description": "Get statistik companies (total, active, trial, etc)"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Single Company",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/companies/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "companies", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "company-uuid-here",
+                  "description": "Company ID"
+                }
+              ]
+            },
+            "description": "Detail company by ID dengan users & subscription"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Update Company",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "name",
+                  "value": "PT Technology Indonesia (Updated)",
+                  "type": "text",
+                  "description": "Company name (optional)",
+                  "disabled": true
+                },
+                {
+                  "key": "email",
+                  "value": "newemail@techindo.com",
+                  "type": "text",
+                  "description": "Company email (optional)",
+                  "disabled": true
+                },
+                {
+                  "key": "phone",
+                  "value": "+628987654321",
+                  "type": "text",
+                  "description": "Company phone (optional)",
+                  "disabled": true
+                },
+                {
+                  "key": "address",
+                  "value": "Jl. New Address 456",
+                  "type": "text",
+                  "description": "Company address (optional)",
+                  "disabled": true
+                },
+                {
+                  "key": "website",
+                  "value": "https://newtechindo.com",
+                  "type": "text",
+                  "description": "Company website (optional)",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "type": "text",
+                  "description": "Company status: ACTIVE, TRIAL, SUSPENDED, INACTIVE (optional)"
+                },
+                {
+                  "key": "logo",
+                  "type": "file",
+                  "description": "New company logo - old logo will be deleted automatically (optional)",
+                  "disabled": true
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/companies/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "companies", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "company-uuid-here",
+                  "description": "Company ID"
+                }
+              ]
+            },
+            "description": "Update company data (partial update). All fields are optional.\n\n**Logo Update:**\n- Upload new logo to replace existing one\n- Old logo file will be automatically deleted\n- Leave logo field disabled if you don't want to change it\n- Format: JPEG, PNG only\n- Max Size: 1MB\n\n**Note:** Enable/disable fields as needed for your update."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Delete Company",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/companies/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "companies", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "company-uuid-here",
+                  "description": "Company ID"
+                }
+              ]
+            },
+            "description": "Delete company permanently.\n\n**Note:** Logo file will be automatically deleted from server when company is deleted."
+          },
+          "response": []
+        }
+      ],
+      "description": "Company management endpoints for superadmin.\n\n**Logo Upload Feature:**\n- Create & Update company now support logo upload\n- Format: JPEG, PNG only\n- Max Size: 1MB (1048576 bytes)\n- Recommended: 200x200 - 500x500 px, square (1:1)\n- Storage: Uploaded files stored in `uploads/logos/`\n- Access: Logo URL returned in response, accessible via HTTP\n- Auto-cleanup: Old logos deleted on update/delete\n\n**Example Logo URL:**\n```\nhttp://localhost:3000/uploads/logos/logo-1703151234567-987654321.png\n```",
+      "auth": {
+        "type": "bearer",
+        "bearer": [
+          {
+            "key": "token",
+            "value": "{{token}}",
+            "type": "string"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Superadmin - Pricing Plans",
+      "item": [
+        {
+          "name": "1. Create Pricing Plan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Premium\",\n  \"description\": \"Premium plan for enterprise\",\n  \"price\": 299.99,\n  \"billingPeriod\": \"MONTHLY\",\n  \"features\": [\n    \"Unlimited users\",\n    \"Unlimited projects\",\n    \"1TB storage\",\n    \"24/7 Priority support\",\n    \"Custom integrations\"\n  ],\n  \"maxUsers\": 999,\n  \"maxProjects\": 9999,\n  \"maxStorage\": 1000,\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/pricing-plans",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "pricing-plans"]
+            },
+            "description": "Buat pricing plan baru. Billing: MONTHLY, YEARLY, LIFETIME"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get All Pricing Plans",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/pricing-plans?includeInactive=false",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "pricing-plans"],
+              "query": [
+                {
+                  "key": "includeInactive",
+                  "value": "false",
+                  "description": "Include inactive plans"
+                }
+              ]
+            },
+            "description": "List semua pricing plans"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Single Pricing Plan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/pricing-plans/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "pricing-plans", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "plan-uuid-here",
+                  "description": "Pricing Plan ID"
+                }
+              ]
+            },
+            "description": "Detail pricing plan by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Update Pricing Plan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 89.99,\n  \"maxUsers\": 25\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/pricing-plans/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "pricing-plans", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "plan-uuid-here",
+                  "description": "Pricing Plan ID"
+                }
+              ]
+            },
+            "description": "Update pricing plan (partial update)"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Delete Pricing Plan",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/pricing-plans/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "pricing-plans", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "plan-uuid-here",
+                  "description": "Pricing Plan ID"
+                }
+              ]
+            },
+            "description": "Hapus pricing plan"
+          },
+          "response": []
+        }
+      ],
+      "description": "Pricing plan management untuk superadmin"
+    },
+    {
+      "name": "Superadmin - Dashboard",
+      "item": [
+        {
+          "name": "1. Get Dashboard Overview",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/dashboard/overview",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "dashboard", "overview"]
+            },
+            "description": "Overview statistik sistem (companies, users, revenue, dll)"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get Company Growth",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/dashboard/company-growth?months=6",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "dashboard", "company-growth"],
+              "query": [
+                {
+                  "key": "months",
+                  "value": "6",
+                  "description": "Number of months"
+                }
+              ]
+            },
+            "description": "Data pertumbuhan company per bulan"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Subscription Breakdown",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/dashboard/subscription-breakdown",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "dashboard", "subscription-breakdown"]
+            },
+            "description": "Breakdown subscription per pricing plan dengan revenue"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Company Status Distribution",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/dashboard/company-status",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "dashboard", "company-status"]
+            },
+            "description": "Distribusi company berdasarkan status (ACTIVE, TRIAL, SUSPENDED, INACTIVE)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Dashboard analytics untuk superadmin"
+    }
+  ]
+}

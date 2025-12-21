@@ -1,4 +1,4 @@
-# ERP System - Superadmin Module
+buatak# ERP System - Superadmin Module
 
 ## 🎯 Fitur Superadmin
 
@@ -14,9 +14,73 @@ Sistem ERP multi-tenant dengan fitur lengkap untuk superadmin mengelola:
 - **[Authentication Guide](./AUTHENTICATION_GUIDE.md)** - Lengkap: JWT authentication, testing, security features
 - **[This File]** - Superadmin endpoints & features overview
 
+## 🎭 Role Hierarchy
+
+### Superadmin Roles
+
+```
+┌─────────────────────────────────────┐
+│     MASTER SUPERADMIN               │
+│  ✓ All system access                │
+│  ✓ Can register new superadmins     │
+│  ✓ Full company management          │
+│  ✓ Pricing & subscriptions          │
+└─────────────────────────────────────┘
+              │
+              ├── Can create
+              ↓
+┌─────────────────────────────────────┐
+│     SUPERADMIN                      │
+│  ✓ All system access                │
+│  ✗ Cannot register superadmins      │
+│  ✓ Full company management          │
+│  ✓ Pricing & subscriptions          │
+└─────────────────────────────────────┘
+```
+
+### Company Roles (Per Tenant)
+
+```
+┌─────────────────────────────────────┐
+│     ADMIN (Company Admin)           │
+│  ✓ Full company access              │
+│  ✓ Manage employees                 │
+│  ✓ All projects & finance           │
+└─────────────────────────────────────┘
+              │
+              ├── Can manage
+              ↓
+┌─────────────────────────────────────┐
+│     MANAGER                         │
+│  ✓ Project management               │
+│  ✓ Read employee data               │
+│  ✓ Read finance data                │
+└─────────────────────────────────────┘
+              │
+              ├── Can assign tasks
+              ↓
+┌─────────────────────────────────────┐
+│     STAFF                           │
+│  ✓ Read projects                    │
+│  ✓ Manage own tasks                 │
+└─────────────────────────────────────┘
+```
+
+**Key Points:**
+- 🔐 Only **1 Master Superadmin** should exist in production
+- 👥 Multiple **Regular Superadmins** can be created by Master
+- 🏢 Each company has their own Admin/Manager/Staff hierarchy
+- 🔒 Superadmins have NO company association (companyId = null)
+
 ## 🔐 Login Credentials
 
-### Superadmin
+### Master Superadmin (Can register other superadmins)
+```
+Email: master@erp-system.com
+Password: MasterAdmin123!
+```
+
+### Regular Superadmin (Cannot register superadmins)
 ```
 Email: superadmin@erp-system.com
 Password: SuperAdmin123!
@@ -63,6 +127,73 @@ Password: Staff123!
 - **Expense** - Pengeluaran
 
 ## 🚀 API Endpoints
+
+### Authentication
+
+#### Login (All Roles)
+```http
+POST /auth/login
+Content-Type: application/json
+
+{
+  "email": "master@erp-system.com",
+  "password": "MasterAdmin123!"
+}
+```
+
+Response:
+```json
+{
+  "access_token": "jwt-token-here",
+  "user": {
+    "id": "uuid",
+    "firstName": "Master",
+    "lastName": "Admin",
+    "email": "master@erp-system.com",
+    "role": "master-superadmin",
+    "company": null,
+    "isSuperAdmin": true,
+    "isMasterSuperAdmin": true
+  }
+}
+```
+
+#### Register Superadmin (Master Superadmin Only) 🔒
+```http
+POST /auth/register-superadmin
+Content-Type: application/json
+Authorization: Bearer {master-superadmin-token}
+
+{
+  "email": "newsuperadmin@erp-system.com",
+  "password": "StrongPassword123!",
+  "firstName": "New",
+  "lastName": "Superadmin"
+}
+```
+
+**⚠️ Security Rules:**
+- ✅ Only `master-superadmin` can access this endpoint
+- ❌ Regular `superadmin` CANNOT register new superadmins
+- ❌ Unauthenticated requests will be denied
+- New superadmin will have role `superadmin` (NOT master-superadmin)
+
+Response:
+```json
+{
+  "message": "Superadmin registered successfully",
+  "user": {
+    "id": "uuid",
+    "email": "newsuperadmin@erp-system.com",
+    "firstName": "New",
+    "lastName": "Superadmin",
+    "role": {
+      "name": "superadmin",
+      "description": "Super Administrator - Full system access (cannot register superadmins)"
+    }
+  }
+}
+```
 
 ### Superadmin - Companies
 
@@ -363,6 +494,51 @@ src/
 3. ✅ Implement Subscriptions management
 4. ✅ Add audit logging
 5. ✅ Build company-specific modules (for tenant users)
+
+## 🧪 Quick Test
+
+### Test Register Superadmin API
+```bash
+# Run automated test script
+./test-register-superadmin.sh
+```
+
+The script will test:
+1. ✅ Master Superadmin can login
+2. ✅ Master can register new superadmins
+3. ✅ Regular Superadmin CANNOT register superadmins (403 Forbidden)
+4. ✅ Unauthenticated requests denied (401 Unauthorized)
+
+### Manual Test with cURL
+
+```bash
+# 1. Login as Master Superadmin
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "master@erp-system.com",
+    "password": "MasterAdmin123!"
+  }'
+
+# Copy the access_token from response
+
+# 2. Register New Superadmin (replace YOUR_TOKEN)
+curl -X POST http://localhost:3000/auth/register-superadmin \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_TOKEN" \
+  -d '{
+    "email": "newsuperadmin@erp-system.com",
+    "password": "SecurePassword123!",
+    "firstName": "New",
+    "lastName": "Superadmin"
+  }'
+
+# Expected: Success (201 Created)
+
+# 3. Try with Regular Superadmin token
+# Login as superadmin@erp-system.com first, then try to register
+# Expected: Error (403 Forbidden)
+```
 
 ## 🎊 Status
 

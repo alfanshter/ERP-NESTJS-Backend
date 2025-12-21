@@ -1,0 +1,374 @@
+{
+  "info": {
+    "name": "Company Logo Upload",
+    "description": "API Collection for testing company logo upload feature",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Register Superadmin",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"superadmin@erp.com\",\n  \"password\": \"SuperAdmin123!\",\n  \"firstName\": \"Super\",\n  \"lastName\": \"Admin\",\n  \"masterKey\": \"MASTER_SUPER_ADMIN_KEY_2024\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/register/superadmin",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "register", "superadmin"]
+        }
+      }
+    },
+    {
+      "name": "2. Login Superadmin",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var jsonData = pm.response.json();",
+              "pm.environment.set(\"token\", jsonData.access_token);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"superadmin@erp.com\",\n  \"password\": \"SuperAdmin123!\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/auth/login",
+          "host": ["{{baseUrl}}"],
+          "path": ["auth", "login"]
+        }
+      }
+    },
+    {
+      "name": "3. Create Company WITH Logo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "PT Technology Indonesia",
+              "type": "text"
+            },
+            {
+              "key": "email",
+              "value": "info@techindo.com",
+              "type": "text"
+            },
+            {
+              "key": "phone",
+              "value": "+628123456789",
+              "type": "text"
+            },
+            {
+              "key": "address",
+              "value": "Jl. Sudirman No. 123, Jakarta Pusat",
+              "type": "text"
+            },
+            {
+              "key": "website",
+              "value": "https://techindo.com",
+              "type": "text"
+            },
+            {
+              "key": "status",
+              "value": "ACTIVE",
+              "type": "text"
+            },
+            {
+              "key": "logo",
+              "type": "file",
+              "description": "Select a PNG or JPEG image file (max 1MB)"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/superadmin/companies",
+          "host": ["{{baseUrl}}"],
+          "path": ["superadmin", "companies"]
+        },
+        "description": "Create a new company with logo upload. The logo field is optional. Select an image file (PNG or JPEG, max 1MB)."
+      }
+    },
+    {
+      "name": "4. Create Company WITHOUT Logo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "PT Digital Solution",
+              "type": "text"
+            },
+            {
+              "key": "email",
+              "value": "contact@digitalsolution.com",
+              "type": "text"
+            },
+            {
+              "key": "phone",
+              "value": "+628987654321",
+              "type": "text"
+            },
+            {
+              "key": "status",
+              "value": "TRIAL",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/superadmin/companies",
+          "host": ["{{baseUrl}}"],
+          "path": ["superadmin", "companies"]
+        },
+        "description": "Create a new company without logo. Logo is optional field."
+      }
+    },
+    {
+      "name": "5. Get All Companies",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/superadmin/companies?page=1&limit=10",
+          "host": ["{{baseUrl}}"],
+          "path": ["superadmin", "companies"],
+          "query": [
+            {
+              "key": "page",
+              "value": "1"
+            },
+            {
+              "key": "limit",
+              "value": "10"
+            }
+          ]
+        },
+        "description": "Get list of all companies. Check the 'logo' field in response for logo URLs."
+      }
+    },
+    {
+      "name": "6. Get Company by ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/superadmin/companies/{{companyId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["superadmin", "companies", "{{companyId}}"]
+        },
+        "description": "Get company details by ID. Replace {{companyId}} with actual company UUID."
+      }
+    },
+    {
+      "name": "7. Update Company WITH New Logo",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "PT Technology Indonesia (Updated)",
+              "type": "text"
+            },
+            {
+              "key": "logo",
+              "type": "file",
+              "description": "Upload new logo - old logo will be automatically deleted"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/superadmin/companies/{{companyId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["superadmin", "companies", "{{companyId}}"]
+        },
+        "description": "Update company with new logo. Old logo file will be automatically deleted from server."
+      }
+    },
+    {
+      "name": "8. Update Company WITHOUT Logo",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "PT Digital Solution (Updated)",
+              "type": "text"
+            },
+            {
+              "key": "status",
+              "value": "ACTIVE",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/superadmin/companies/{{companyId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["superadmin", "companies", "{{companyId}}"]
+        },
+        "description": "Update company without changing logo. Existing logo will remain."
+      }
+    },
+    {
+      "name": "9. Delete Company",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/superadmin/companies/{{companyId}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["superadmin", "companies", "{{companyId}}"]
+        },
+        "description": "Delete company. Logo file will be automatically deleted from server."
+      }
+    },
+    {
+      "name": "10. Test Invalid File Type (GIF)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "Test Invalid File Type",
+              "type": "text"
+            },
+            {
+              "key": "logo",
+              "type": "file",
+              "description": "Upload a GIF file - should fail with 400 error"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/superadmin/companies",
+          "host": ["{{baseUrl}}"],
+          "path": ["superadmin", "companies"]
+        },
+        "description": "Test error handling for invalid file type. Upload a GIF file to see error response."
+      }
+    },
+    {
+      "name": "11. Test File Size > 1MB",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "name",
+              "value": "Test Large File",
+              "type": "text"
+            },
+            {
+              "key": "logo",
+              "type": "file",
+              "description": "Upload a file > 1MB - should fail with 400 error"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/superadmin/companies",
+          "host": ["{{baseUrl}}"],
+          "path": ["superadmin", "companies"]
+        },
+        "description": "Test error handling for file size exceeding 1MB limit."
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "companyId",
+      "value": "",
+      "description": "Replace with actual company UUID after creating a company"
+    }
+  ]
+}

@@ -8,9 +8,11 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto, RegisterDto } from './dto';
+import { LoginDto, RegisterDto, RegisterSuperadminDto } from './dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { MasterSuperadminGuard } from './guards/master-superadmin.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
+import { MasterSuperadmin } from './decorators/master-superadmin.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -26,6 +28,14 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
+  }
+
+  @Post('register-superadmin')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard, MasterSuperadminGuard)
+  @MasterSuperadmin()
+  async registerSuperadmin(@Body() registerDto: RegisterSuperadminDto) {
+    return this.authService.registerSuperadmin(registerDto);
   }
 
   @UseGuards(JwtAuthGuard)

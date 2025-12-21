@@ -2,6 +2,12 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
+import {
+  deleteFile,
+  extractFilenameFromUrl,
+  UPLOAD_DIR,
+} from '../../common/helpers/file-upload.helper';
+import { join } from 'path';
 
 @Injectable()
 export class CompaniesService {
@@ -119,7 +125,16 @@ export class CompaniesService {
   }
 
   async update(id: string, updateCompanyDto: UpdateCompanyDto) {
-    await this.findOne(id); // Check if exists
+    const existingCompany = await this.findOne(id); // Check if exists
+
+    // If new logo is uploaded and old logo exists, delete old logo file
+    if (updateCompanyDto.logo && existingCompany.logo) {
+      const oldFilename = extractFilenameFromUrl(existingCompany.logo);
+      if (oldFilename) {
+        const oldFilePath = join(UPLOAD_DIR, oldFilename);
+        deleteFile(oldFilePath);
+      }
+    }
 
     return this.prisma.company.update({
       where: { id },
@@ -142,7 +157,16 @@ export class CompaniesService {
   }
 
   async remove(id: string) {
-    await this.findOne(id); // Check if exists
+    const company = await this.findOne(id); // Check if exists
+
+    // Delete logo file if exists
+    if (company.logo) {
+      const filename = extractFilenameFromUrl(company.logo);
+      if (filename) {
+        const filePath = join(UPLOAD_DIR, filename);
+        deleteFile(filePath);
+      }
+    }
 
     return this.prisma.company.delete({
       where: { id },

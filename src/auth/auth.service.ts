@@ -3,11 +3,12 @@ import {
   UnauthorizedException,
   ConflictException,
   NotFoundException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../../prisma/prisma.service';
-import { LoginDto, RegisterDto } from './dto';
+import { LoginDto, RegisterDto, RegisterSuperadminDto } from './dto';
 
 @Injectable()
 export class AuthService {
@@ -50,7 +51,8 @@ export class AuthService {
       email: user.email,
       roleId: user.roleId,
       companyId: user.companyId,
-      isSuperAdmin: user.role.name === 'superadmin',
+      isSuperAdmin: user.role.name === 'superadmin' || user.role.name === 'master-superadmin',
+      isMasterSuperAdmin: user.role.name === 'master-superadmin',
     };
 
     return {
@@ -62,7 +64,8 @@ export class AuthService {
         email: user.email,
         role: user.role.name,
         company: user.company?.name || null,
-        isSuperAdmin: user.role.name === 'superadmin',
+        isSuperAdmin: user.role.name === 'superadmin' || user.role.name === 'master-superadmin',
+        isMasterSuperAdmin: user.role.name === 'master-superadmin',
       },
     };
   }
@@ -130,6 +133,51 @@ export class AuthService {
 
     const { password: _, ...result } = user;
     return result;
+  }
+
+  async registerSuperadmin(registerDto: RegisterSuperadminDto) {
+    // Check if email already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: registerDto.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Email already registered');
+    }
+
+    // Get superadmin role (NOT master-superadmin)
+    const superadminRole = await this.prisma.role.findFirst({
+      where: { name: 'superadmin' },
+    });
+
+    if (!superadminRole) {
+      throw new NotFoundException('Superadmin role not found');
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+
+    // Create superadmin user (no companyId)
+    const user = await this.prisma.user.create({
+      data: {
+        email: registerDto.email,
+        password: hashedPassword,
+        firstName: registerDto.firstName,
+        lastName: registerDto.lastName,
+        roleId: superadminRole.id,
+        companyId: null, // Superadmin tidak punya company
+        isActive: true,
+      },
+      include: {
+        role: true,
+      },
+    });
+
+    const { password: _, ...result } = user;
+    return {
+      message: 'Superadmin registered successfully',
+      user: result,
+    };
   }
 
   async getProfile(userId: string) {

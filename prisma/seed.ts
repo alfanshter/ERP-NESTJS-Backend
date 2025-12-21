@@ -14,8 +14,14 @@ async function main() {
   console.log('\n📋 Creating Roles...')
   const rolesData = [
     {
+      name: 'master-superadmin',
+      description: 'Master Super Administrator - Can register other superadmins',
+      isSystem: true,
+      permissions: ['all', 'superadmin.register'],
+    },
+    {
       name: 'superadmin',
-      description: 'Super Administrator - Full system access',
+      description: 'Super Administrator - Full system access (cannot register superadmins)',
       isSystem: true,
       permissions: ['all'],
     },
@@ -121,8 +127,35 @@ async function main() {
     console.log(`✅ Plan: ${plan.name} - $${plan.price}/${plan.billingPeriod}`)
   }
 
-  // ==================== SUPERADMIN USER (NO COMPANY) ====================
-  console.log('\n👤 Creating Superadmin User...')
+  // ==================== MASTER SUPERADMIN USER (NO COMPANY) ====================
+  console.log('\n👤 Creating Master Superadmin User...')
+  const masterEmail = 'master@erp-system.com'
+  const masterPassword = 'MasterAdmin123!'
+  const hashedMasterPassword = await bcrypt.hash(masterPassword, 10)
+
+  const existingMaster = await prisma.user.findUnique({
+    where: { email: masterEmail },
+  })
+
+  if (existingMaster) {
+    console.log(`✅ Master Superadmin already exists: ${existingMaster.email}`)
+  } else {
+    const master = await prisma.user.create({
+      data: {
+        email: masterEmail,
+        password: hashedMasterPassword,
+        firstName: 'Master',
+        lastName: 'Admin',
+        roleId: roles['master-superadmin'].id,
+        isActive: true,
+      },
+    })
+    console.log(`✅ Created Master Superadmin: ${master.email}`)
+    console.log(`   Password: ${masterPassword}`)
+  }
+
+  // ==================== REGULAR SUPERADMIN USER (NO COMPANY) ====================
+  console.log('\n👤 Creating Regular Superadmin User...')
   const superadminEmail = 'superadmin@erp-system.com'
   const superadminPassword = 'SuperAdmin123!'
   const hashedPassword = await bcrypt.hash(superadminPassword, 10)

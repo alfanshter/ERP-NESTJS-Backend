@@ -1,4 +1,4 @@
-import { IsString, IsEmail, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsEmail, IsOptional, IsEnum, IsUrl } from 'class-validator';
 
 export enum CompanyStatus {
   ACTIVE = 'ACTIVE',
@@ -23,7 +23,7 @@ export class CreateCompanyDto {
   @IsOptional()
   address?: string;
 
-  @IsString()
+  @IsUrl()
   @IsOptional()
   logo?: string;
 
