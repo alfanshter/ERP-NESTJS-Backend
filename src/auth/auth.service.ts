@@ -51,8 +51,10 @@ export class AuthService {
       email: user.email,
       roleId: user.roleId,
       companyId: user.companyId,
-      isSuperAdmin: user.role.name === 'superadmin' || user.role.name === 'master-superadmin',
-      isMasterSuperAdmin: user.role.name === 'master-superadmin',
+      isSuperAdmin:
+        user.role.name === 'superadmin-staff' ||
+        user.role.name === 'superadmin-master',
+      isSuperAdminMaster: user.role.name === 'superadmin-master',
     };
 
     return {
@@ -64,8 +66,10 @@ export class AuthService {
         email: user.email,
         role: user.role.name,
         company: user.company?.name || null,
-        isSuperAdmin: user.role.name === 'superadmin' || user.role.name === 'master-superadmin',
-        isMasterSuperAdmin: user.role.name === 'master-superadmin',
+        isSuperAdmin:
+          user.role.name === 'superadmin-staff' ||
+          user.role.name === 'superadmin-master',
+        isSuperAdminMaster: user.role.name === 'superadmin-master',
       },
     };
   }
@@ -145,26 +149,26 @@ export class AuthService {
       throw new ConflictException('Email already registered');
     }
 
-    // Get superadmin role (NOT master-superadmin)
-    const superadminRole = await this.prisma.role.findFirst({
-      where: { name: 'superadmin' },
+    // Get superadmin-master role (first superadmin to register becomes master)
+    const superadminMasterRole = await this.prisma.role.findFirst({
+      where: { name: 'superadmin-master' },
     });
 
-    if (!superadminRole) {
-      throw new NotFoundException('Superadmin role not found');
+    if (!superadminMasterRole) {
+      throw new NotFoundException('Superadmin-master role not found. Please run seeder.');
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(registerDto.password, 10);
 
-    // Create superadmin user (no companyId)
+    // Create superadmin-master user (no companyId)
     const user = await this.prisma.user.create({
       data: {
         email: registerDto.email,
         password: hashedPassword,
         firstName: registerDto.firstName,
         lastName: registerDto.lastName,
-        roleId: superadminRole.id,
+        roleId: superadminMasterRole.id,
         companyId: null, // Superadmin tidak punya company
         isActive: true,
       },
@@ -175,7 +179,7 @@ export class AuthService {
 
     const { password: _, ...result } = user;
     return {
-      message: 'Superadmin registered successfully',
+      message: 'Superadmin master registered successfully',
       user: result,
     };
   }

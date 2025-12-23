@@ -28,13 +28,25 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       throw new UnauthorizedException('User not found or inactive');
     }
 
+    // Check if user is superadmin (both master and staff)
+    const isSuperAdmin =
+      user.role.name === 'superadmin-master' ||
+      user.role.name === 'superadmin-staff';
+    const isSuperAdminMaster = user.role.name === 'superadmin-master';
+
     return {
       userId: user.id,
       email: user.email,
       roleId: user.roleId,
+      role: {
+        id: user.role.id,
+        name: user.role.name,
+        description: user.role.description,
+      },
       roleName: user.role.name,
       companyId: user.companyId,
-      isSuperAdmin: user.role.name === 'superadmin',
+      isSuperAdmin,
+      isSuperAdminMaster,
     };
   }
 }

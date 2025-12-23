@@ -1,13 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import {
-  deleteFile,
-  extractFilenameFromUrl,
-  UPLOAD_DIR,
-} from '../../common/helpers/file-upload.helper';
-import { join } from 'path';
+import { deleteFile } from '../../common/helpers/file-upload.helper';
 
 @Injectable()
 export class CompaniesService {
@@ -127,13 +122,24 @@ export class CompaniesService {
   async update(id: string, updateCompanyDto: UpdateCompanyDto) {
     const existingCompany = await this.findOne(id); // Check if exists
 
-    // If new logo is uploaded and old logo exists, delete old logo file
-    if (updateCompanyDto.logo && existingCompany.logo) {
-      const oldFilename = extractFilenameFromUrl(existingCompany.logo);
-      if (oldFilename) {
-        const oldFilePath = join(UPLOAD_DIR, oldFilename);
-        deleteFile(oldFilePath);
+    // Check if email is being changed and if it's already taken by another company
+    if (updateCompanyDto.email && updateCompanyDto.email !== existingCompany.email) {
+      const companyWithEmail = await this.prisma.company.findFirst({
+        where: {
+          email: updateCompanyDto.email,
+          id: { not: id },
+        },
+      });
+
+      if (companyWithEmail) {
+        throw new ConflictException('Email already used by another company');
       }
+    }
+
+    // If new logo is uploaded and old logo exists, delete old logo file
+    // logo stored as relative path like "logos/logo-123.jpg"
+    if (updateCompanyDto.logo && existingCompany.logo) {
+      deleteFile(existingCompany.logo);
     }
 
     return this.prisma.company.update({
@@ -159,13 +165,9 @@ export class CompaniesService {
   async remove(id: string) {
     const company = await this.findOne(id); // Check if exists
 
-    // Delete logo file if exists
+    // Delete logo file if exists (logo stored as relative path like "logos/logo-123.jpg")
     if (company.logo) {
-      const filename = extractFilenameFromUrl(company.logo);
-      if (filename) {
-        const filePath = join(UPLOAD_DIR, filename);
-        deleteFile(filePath);
-      }
+      deleteFile(company.logo);
     }
 
     return this.prisma.company.delete({

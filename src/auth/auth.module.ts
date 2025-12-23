@@ -6,6 +6,7 @@ import { AuthController } from './auth.controller';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { MasterSuperadminGuard } from './guards/master-superadmin.guard';
+import { SuperadminMasterGuard } from './guards/superadmin-master.guard';
 import { PrismaModule } from '../../prisma/prisma.module';
 
 @Module({
@@ -22,7 +23,13 @@ import { PrismaModule } from '../../prisma/prisma.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, LocalStrategy, MasterSuperadminGuard],
-  exports: [AuthService, JwtModule],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    LocalStrategy,
+    MasterSuperadminGuard,
+    SuperadminMasterGuard,
+  ],
+  exports: [AuthService, JwtModule, SuperadminMasterGuard],
 })
 export class AuthModule {}

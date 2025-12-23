@@ -3,7 +3,9 @@ import { PrismaPg } from '@prisma/adapter-pg'
 import { Pool } from 'pg'
 import bcrypt from 'bcrypt'
 
-const pool = new Pool({ connectionString: process.env.DATABASE_URL })
+// Create Pool with explicit database connection
+const connectionString = process.env.DATABASE_URL || 'postgresql://macbook@localhost:5432/erp_db?schema=public'
+const pool = new Pool({ connectionString })
 const adapter = new PrismaPg(pool)
 const prisma = new PrismaClient({ adapter })
 
@@ -14,16 +16,16 @@ async function main() {
   console.log('\n📋 Creating Roles...')
   const rolesData = [
     {
-      name: 'master-superadmin',
-      description: 'Master Super Administrator - Can register other superadmins',
+      name: 'superadmin-master',
+      description: 'Master Super Administrator - Full control including managing superadmin staff',
       isSystem: true,
-      permissions: ['all', 'superadmin.register'],
+      permissions: ['all', 'superadmin.create', 'superadmin.manage'],
     },
     {
-      name: 'superadmin',
-      description: 'Super Administrator - Full system access (cannot register superadmins)',
+      name: 'superadmin-staff',
+      description: 'Super Administrator Staff - Full system access but cannot manage other superadmins',
       isSystem: true,
-      permissions: ['all'],
+      permissions: ['all', 'companies.all', 'plans.all', 'subscriptions.all'],
     },
     {
       name: 'admin',
@@ -129,7 +131,7 @@ async function main() {
 
   // ==================== MASTER SUPERADMIN USER (NO COMPANY) ====================
   console.log('\n👤 Creating Master Superadmin User...')
-  const masterEmail = 'master@erp-system.com'
+  const masterEmail = 'master@erp.com'
   const masterPassword = 'MasterAdmin123!'
   const hashedMasterPassword = await bcrypt.hash(masterPassword, 10)
 
@@ -139,6 +141,9 @@ async function main() {
 
   if (existingMaster) {
     console.log(`✅ Master Superadmin already exists: ${existingMaster.email}`)
+    console.log(`   📧 Email: ${masterEmail}`)
+    console.log(`   🔑 Password: ${masterPassword}`)
+    console.log(`   🎖️  Role: superadmin-master`)
   } else {
     const master = await prisma.user.create({
       data: {
@@ -146,39 +151,48 @@ async function main() {
         password: hashedMasterPassword,
         firstName: 'Master',
         lastName: 'Admin',
-        roleId: roles['master-superadmin'].id,
+        roleId: roles['superadmin-master'].id,
         isActive: true,
       },
     })
     console.log(`✅ Created Master Superadmin: ${master.email}`)
-    console.log(`   Password: ${masterPassword}`)
+    console.log(`   📧 Email: ${masterEmail}`)
+    console.log(`   🔑 Password: ${masterPassword}`)
+    console.log(`   🎖️  Role: superadmin-master`)
+    console.log(`   💡 Use this account to login and manage staff`)
   }
 
-  // ==================== REGULAR SUPERADMIN USER (NO COMPANY) ====================
-  console.log('\n👤 Creating Regular Superadmin User...')
-  const superadminEmail = 'superadmin@erp-system.com'
-  const superadminPassword = 'SuperAdmin123!'
-  const hashedPassword = await bcrypt.hash(superadminPassword, 10)
+  // ==================== STAFF SUPERADMIN USER (NO COMPANY) ====================
+  console.log('\n👤 Creating Staff Superadmin User (for testing)...')
+  const staffEmail = 'staff@erp.com'
+  const staffPassword = 'Staff123!'
+  const hashedStaffPassword = await bcrypt.hash(staffPassword, 10)
 
-  const existingSuperadmin = await prisma.user.findUnique({
-    where: { email: superadminEmail },
+  const existingStaff = await prisma.user.findUnique({
+    where: { email: staffEmail },
   })
 
-  if (existingSuperadmin) {
-    console.log(`✅ Superadmin already exists: ${existingSuperadmin.email}`)
+  if (existingStaff) {
+    console.log(`✅ Staff Superadmin already exists: ${existingStaff.email}`)
+    console.log(`   📧 Email: ${staffEmail}`)
+    console.log(`   🔑 Password: ${staffPassword}`)
+    console.log(`   ⭐ Role: superadmin-staff`)
   } else {
-    const superadmin = await prisma.user.create({
+    const staff = await prisma.user.create({
       data: {
-        email: superadminEmail,
-        password: hashedPassword,
-        firstName: 'Super',
+        email: staffEmail,
+        password: hashedStaffPassword,
+        firstName: 'Staff',
         lastName: 'Admin',
-        roleId: roles['superadmin'].id,
+        roleId: roles['superadmin-staff'].id,
         isActive: true,
       },
     })
-    console.log(`✅ Created Superadmin: ${superadmin.email}`)
-    console.log(`   Password: ${superadminPassword}`)
+    console.log(`✅ Created Staff Superadmin: ${staff.email}`)
+    console.log(`   📧 Email: ${staffEmail}`)
+    console.log(`   🔑 Password: ${staffPassword}`)
+    console.log(`   ⭐ Role: superadmin-staff`)
+    console.log(`   💡 Use this account to test staff access restrictions`)
   }
 
   // ==================== DEMO COMPANY ====================
@@ -258,10 +272,15 @@ async function main() {
   console.log('\n✨ Seeder finished!')
   console.log('\n📝 Login Credentials:')
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━')
-  console.log('Superadmin:')
-  console.log(`  Email: ${superadminEmail}`)
-  console.log(`  Password: ${superadminPassword}`)
-  console.log('\nDemo Company Admin:')
+  console.log('🎖️  Master Superadmin:')
+  console.log(`  Email: ${masterEmail}`)
+  console.log(`  Password: ${masterPassword}`)
+  console.log('  Role: superadmin-master (Can manage staff)')
+  console.log('\n⭐ Staff Superadmin:')
+  console.log(`  Email: ${staffEmail}`)
+  console.log(`  Password: ${staffPassword}`)
+  console.log('  Role: superadmin-staff (Cannot manage staff)')
+  console.log('\n👤 Demo Company Admin:')
   console.log('  Email: admin@demo.com')
   console.log('  Password: Admin123!')
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n')

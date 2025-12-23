@@ -60,35 +60,24 @@ export const imageFileFilter = (req: any, file: Express.Multer.File, callback: a
 };
 
 /**
- * Generate file URL from filename
+ * Delete file from filesystem using relative path
+ * @param logoPath - Relative path like "logos/logo-123456.jpg" or just "logo-123456.jpg"
  */
-export const generateFileUrl = (req: any, filename: string): string => {
-  const protocol = req.protocol;
-  const host = req.get('host');
-  return `${protocol}://${host}/uploads/logos/${filename}`;
-};
-
-/**
- * Delete file from filesystem
- */
-export const deleteFile = (filePath: string): void => {
+export const deleteFile = (logoPath: string): void => {
   try {
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
+    // Extract filename from path
+    const filename = logoPath.includes('/') 
+      ? logoPath.split('/').pop() 
+      : logoPath;
+    
+    if (!filename) return;
+
+    const fullPath = `${UPLOAD_DIR}/${filename}`;
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath);
     }
   } catch (error) {
-    console.error(`Error deleting file: ${filePath}`, error);
+    console.error(`Error deleting file: ${logoPath}`, error);
   }
 };
 
-/**
- * Extract filename from URL
- */
-export const extractFilenameFromUrl = (url: string): string | null => {
-  try {
-    const urlParts = url.split('/');
-    return urlParts[urlParts.length - 1];
-  } catch (error) {
-    return null;
-  }
-};

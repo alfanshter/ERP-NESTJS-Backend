@@ -23,7 +23,35 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+Enterprise Resource Planning (ERP) System Backend built with [Nest](https://github.com/nestjs/nest) framework and TypeScript.
+
+### ✨ Key Features
+
+- 🔐 **JWT Authentication** - Secure token-based authentication
+- 👥 **Role Hierarchy** - Superadmin master and staff management
+- 🏢 **Company Management** - Multi-company support with logo uploads
+- 💰 **Subscription System** - Pricing plans and subscriptions
+- 📁 **File Upload** - Logo management with automatic cleanup
+- 🔒 **Access Control** - Role-based guards and decorators
+- 📊 **PostgreSQL Database** - Prisma ORM for type-safe queries
+
+### 📚 Documentation
+
+- **[STAFF_MANAGEMENT_WORKFLOW.md](./STAFF_MANAGEMENT_WORKFLOW.md)** - Complete workflow guide for role hierarchy
+- **[POSTMAN_UPDATES.md](./POSTMAN_UPDATES.md)** - Postman collection enhancements
+- **[SUPERADMIN_HIERARCHY.md](./SUPERADMIN_HIERARCHY.md)** - Technical role implementation
+- **[LOGO_UPLOAD_API.md](./LOGO_UPLOAD_API.md)** - File upload documentation
+- **[AUTHENTICATION_GUIDE.md](./AUTHENTICATION_GUIDE.md)** - Auth system guide
+- **[MASTER_SUPERADMIN_API.md](./MASTER_SUPERADMIN_API.md)** - API reference
+
+### 🎯 Quick Links
+
+| Task | Documentation |
+|------|---------------|
+| Get started with superadmin roles | [STAFF_MANAGEMENT_WORKFLOW.md](./STAFF_MANAGEMENT_WORKFLOW.md) |
+| Test with Postman | [POSTMAN_UPDATES.md](./POSTMAN_UPDATES.md) |
+| Upload company logos | [LOGO_UPLOAD_API.md](./LOGO_UPLOAD_API.md) |
+| Understand authentication | [AUTHENTICATION_GUIDE.md](./AUTHENTICATION_GUIDE.md) |
 
 ## Project setup
 

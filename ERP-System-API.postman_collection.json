@@ -15,6 +15,21 @@
       "key": "token",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "master_key",
+      "value": "MASTER_SUPER_ADMIN_KEY_2024",
+      "type": "string"
+    },
+    {
+      "key": "master_email",
+      "value": "master@erp.com",
+      "type": "string"
+    },
+    {
+      "key": "master_password",
+      "value": "MasterAdmin123!",
+      "type": "string"
     }
   ],
   "item": [
@@ -32,7 +47,18 @@
                   "    var jsonData = pm.response.json();",
                   "    pm.environment.set(\"token\", jsonData.access_token);",
                   "    pm.collectionVariables.set(\"token\", jsonData.access_token);",
-                  "    console.log(\"Token saved:\", jsonData.access_token);",
+                  "    ",
+                  "    // Show user info",
+                  "    console.log(\"✅ Login successful!\");",
+                  "    console.log(\"📧 Email:\", jsonData.user.email);",
+                  "    console.log(\"👤 Role:\", jsonData.user.role);",
+                  "    console.log(\"🔑 Token saved to collection variables\");",
+                  "    ",
+                  "    if (jsonData.user.isSuperAdminMaster) {",
+                  "        console.log(\"\\n🎖️  SUPERADMIN MASTER - Full access to staff management!\");",
+                  "    } else if (jsonData.user.isSuperAdmin) {",
+                  "        console.log(\"\\n⭐ SUPERADMIN STAFF - Cannot access staff management\");",
+                  "    }",
                   "}"
                 ],
                 "type": "text/javascript"
@@ -49,14 +75,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"master@erp-system.com\",\n  \"password\": \"MasterAdmin123!\"\n}"
+              "raw": "{\n  \"email\": \"{{master_email}}\",\n  \"password\": \"{{master_password}}\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/login",
               "host": ["{{base_url}}"],
               "path": ["auth", "login"]
             },
-            "description": "Login untuk semua role. Credentials:\n- Master: master@erp-system.com / MasterAdmin123!\n- Superadmin: superadmin@erp-system.com / SuperAdmin123!\n- Admin: admin@demo.com / Admin123!"
+            "description": "**🔐 STEP 2: Login untuk semua role**\n\n**Default (using variables):**\n- Email: `{{master_email}}` (master@erp.com)\n- Password: `{{master_password}}` (MasterAdmin123!)\n\n**Other roles (manual):**\n- Superadmin Staff: staff@erp.com / Staff123!\n- Admin: admin@demo.com / Admin123!\n\n**Response includes:**\n```json\n{\n  \"access_token\": \"eyJhbG...\",\n  \"user\": {\n    \"role\": \"superadmin-master\",\n    \"isSuperAdminMaster\": true\n  }\n}\n```\n\n**Token auto-saved** to collection variable `{{token}}`\n\n**After login:**\n- ✅ Token ready for all requests\n- 🔐 Check Console for role confirmation\n- ⏭️  Can now access protected endpoints"
           },
           "response": []
         },
@@ -84,18 +110,24 @@
           "response": []
         },
         {
-          "name": "3. Register Superadmin (Master Only)",
+          "name": "3. Register Superadmin Master (First Time)",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "// Optional: Save user info after registration",
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    console.log(\"✅ Superadmin Master registered:\", jsonData.user.email);",
+                  "    console.log(\"⚠️  Next: Use Login endpoint to get token\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{token}}",
-                  "type": "string"
-                }
-              ]
-            },
             "method": "POST",
             "header": [
               {
@@ -105,19 +137,46 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"newsuperadmin@erp-system.com\",\n  \"password\": \"StrongPassword123!\",\n  \"firstName\": \"New\",\n  \"lastName\": \"Superadmin\"\n}"
+              "raw": "{\n  \"email\": \"{{master_email}}\",\n  \"password\": \"{{master_password}}\",\n  \"firstName\": \"Master\",\n  \"lastName\": \"Admin\",\n  \"masterKey\": \"{{master_key}}\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/auth/register-superadmin",
               "host": ["{{base_url}}"],
               "path": ["auth", "register-superadmin"]
             },
-            "description": "⚠️ Hanya Master Superadmin yang bisa akses endpoint ini!"
+            "description": "**🔑 STEP 1: First-time registration for Superadmin Master**\n\nThis endpoint creates the first `superadmin-master` account. Requires master key for security.\n\n**Variables Used:**\n- `{{master_email}}`: master@erp.com\n- `{{master_password}}`: MasterAdmin123!\n- `{{master_key}}`: MASTER_SUPER_ADMIN_KEY_2024\n\n**Master Key Source:** Set in collection variables (check .env file)\n\n**Role Created:** `superadmin-master`\n- ✅ Full system control\n- ✅ Can create/manage superadmin staff\n- ✅ Can access all endpoints\n\n**After registration:**\n1. ✅ Account created successfully\n2. ⏭️  Next: Login with this account (use endpoint #1)\n3. 🔐 Use token to access staff management\n\n**⚠️ Important:**\n- Only do this ONCE for first master\n- Change credentials in production\n- Keep master key secure"
           },
           "response": []
         },
         {
           "name": "4. Get Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    console.log(\"\\n👤 User Profile:\");",
+                  "    console.log(\"📧 Email:\", jsonData.email);",
+                  "    console.log(\"👔 Role:\", jsonData.role.name);",
+                  "    console.log(\"✅ Active:\", jsonData.isActive);",
+                  "    ",
+                  "    if (jsonData.role.name === 'superadmin-master') {",
+                  "        console.log(\"\\n🎖️  MASTER ACCESS:\");",
+                  "        console.log(\"   ✅ Can create superadmin staff\");",
+                  "        console.log(\"   ✅ Can access /superadmin/staff endpoints\");",
+                  "    } else if (jsonData.role.name === 'superadmin-staff') {",
+                  "        console.log(\"\\n⭐ STAFF ACCESS:\");",
+                  "        console.log(\"   ✅ Full system access\");",
+                  "        console.log(\"   ❌ Cannot access /superadmin/staff endpoints\");",
+                  "    }",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "bearer",
@@ -136,7 +195,7 @@
               "host": ["{{base_url}}"],
               "path": ["auth", "profile"]
             },
-            "description": "Get detail profile user yang sedang login"
+            "description": "**🔍 Check user profile and role**\n\nUse this to verify:\n- Current role (superadmin-master vs superadmin-staff)\n- User details\n- Active status\n\n**Response example:**\n```json\n{\n  \"id\": \"uuid\",\n  \"email\": \"master@erp.com\",\n  \"firstName\": \"Master\",\n  \"role\": {\n    \"name\": \"superadmin-master\"\n  },\n  \"isActive\": true\n}\n```\n\n**Role Check:**\n- `superadmin-master` ✅ Can access staff management\n- `superadmin-staff` ❌ Cannot access staff management\n\n**Troubleshooting 403 Error:**\nIf you get 403 on `/superadmin/staff`, check role here!"
           },
           "response": []
         },
@@ -165,7 +224,7 @@
           "response": []
         }
       ],
-      "description": "Authentication endpoints untuk login, register, dan profile"
+      "description": "Authentication endpoints for login, register, and profile management.\n\n**Role Hierarchy:**\n1. `superadmin-master`: First superadmin, full control, can manage staff\n2. `superadmin-staff`: Full system access, cannot create accounts\n3. `admin`: Company admin\n4. `manager`: Company manager\n5. `staff`: Company staff\n\n**Getting Started:**\n1. Register first superadmin-master using master key\n2. Login as superadmin-master\n3. Create superadmin-staff accounts via Staff Management endpoints"
     },
     {
       "name": "Superadmin - Companies",
@@ -422,7 +481,7 @@
                 }
               ]
             },
-            "description": "Update company data (partial update). All fields are optional.\n\n**Logo Update:**\n- Upload new logo to replace existing one\n- Old logo file will be automatically deleted\n- Leave logo field disabled if you don't want to change it\n- Format: JPEG, PNG only\n- Max Size: 1MB\n\n**Note:** Enable/disable fields as needed for your update."
+            "description": "Update company data (partial update). All fields are optional.\n\n**Email Update:**\n- Email must be unique across all companies\n- Returns 409 Conflict if email already used by another company\n- Validation skips current company when checking uniqueness\n\n**Logo Update:**\n- Upload new logo to replace existing one\n- Old logo file will be automatically deleted\n- Leave logo field disabled if you don't want to change it\n- Format: JPEG, PNG only\n- Max Size: 1MB\n\n**Note:** Enable/disable fields as needed for your update."
           },
           "response": []
         },
@@ -469,6 +528,437 @@
           }
         ]
       }
+    },
+    {
+      "name": "Superadmin - Staff Management",
+      "item": [
+        {
+          "name": "1. Create Superadmin Staff",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    console.log(\"\\n✅ Staff Created Successfully!\");",
+                  "    console.log(\"📧 Email:\", jsonData.email);",
+                  "    console.log(\"👤 Name:\", jsonData.firstName, jsonData.lastName);",
+                  "    console.log(\"🎭 Role:\", jsonData.role.name);",
+                  "    console.log(\"🆔 ID:\", jsonData.id);",
+                  "} else if (pm.response.code === 403) {",
+                  "    console.log(\"\\n❌ ACCESS DENIED!\");",
+                  "    console.log(\"Only superadmin-master can create staff.\");",
+                  "    console.log(\"\\n💡 Solution:\");",
+                  "    console.log(\"1. Register as master using 'Register Superadmin Master'\");",
+                  "    console.log(\"2. Login with master account\");",
+                  "    console.log(\"3. Check role in 'Get Profile'\");",
+                  "} else if (pm.response.code === 409) {",
+                  "    console.log(\"\\n⚠️  Email already exists!\");",
+                  "    console.log(\"Try different email address.\");",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"staff1@erp.com\",\n  \"password\": \"Staff123!\",\n  \"firstName\": \"Staff\",\n  \"lastName\": \"One\",\n  \"phone\": \"+628123456789\",\n  \"country\": \"Indonesia\",\n  \"address\": \"Jl. Sudirman No. 123\",\n  \"city\": \"Jakarta\",\n  \"postalCode\": \"12345\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/staff",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "staff"]
+            },
+            "description": "Create new superadmin staff account. **Only accessible by superadmin-master**.\n\nThe created staff will have role `superadmin-staff` with full system access but cannot create other superadmin accounts.\n\n**Required fields:**\n- email\n- password (min 8 characters)\n- firstName\n- lastName\n\n**Optional fields:**\n- phone\n- country\n- address\n- city\n- postalCode\n- avatar"
+          },
+          "response": []
+        },
+        {
+          "name": "1b. Create Staff with Avatar (form-data)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "staff10@erp.com",
+                  "type": "text"
+                },
+                {
+                  "key": "password",
+                  "value": "Staff123!",
+                  "type": "text"
+                },
+                {
+                  "key": "firstName",
+                  "value": "Staff",
+                  "type": "text"
+                },
+                {
+                  "key": "lastName",
+                  "value": "Ten",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "+628123456789",
+                  "type": "text"
+                },
+                {
+                  "key": "country",
+                  "value": "Indonesia",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "Jl. Sudirman No. 123",
+                  "type": "text"
+                },
+                {
+                  "key": "city",
+                  "value": "Jakarta",
+                  "type": "text"
+                },
+                {
+                  "key": "postalCode",
+                  "value": "12345",
+                  "type": "text"
+                },
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": [],
+                  "description": "Upload image file (JPG, PNG, GIF, WEBP) - Max 5MB before compression"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/staff",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "staff"]
+            },
+            "description": "**Create staff with avatar photo upload**\n\n✅ **Features:**\n- Automatic image compression (max 500x500px)\n- Convert to JPEG format with 85% quality\n- Reduces file size significantly\n- High quality result\n\n📸 **Avatar Upload:**\n- Supported formats: JPG, JPEG, PNG, GIF, WEBP\n- Max size before compression: 5MB\n- After compression: ~50-200KB (depends on image)\n- Output: 500x500px max (maintains aspect ratio)\n\n**How to use:**\n1. Click on \"avatar\" field\n2. Click \"Select Files\"\n3. Choose an image file\n4. Send request\n\n**Note:** Avatar is optional. You can use regular JSON request if no photo needed."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get All Superadmin Staff",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/staff?page=1&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "staff"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "search",
+                  "value": "staff",
+                  "disabled": true,
+                  "description": "Search by email, first name, or last name"
+                }
+              ]
+            },
+            "description": "List all superadmin staff with pagination. **Only accessible by superadmin-master**."
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Staff Statistics",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/staff/stats",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "staff", "stats"]
+            },
+            "description": "Get statistics about superadmin staff (total, active, inactive). **Only accessible by superadmin-master**."
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Staff by ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/staff/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "staff", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "staff-uuid-here",
+                  "description": "Staff User ID"
+                }
+              ]
+            },
+            "description": "Get superadmin staff details by ID. **Only accessible by superadmin-master**."
+          },
+          "response": []
+        },
+        {
+          "name": "5. Update Staff",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"updatedemail@example.com\",\n  \"firstName\": \"Updated Staff\",\n  \"lastName\": \"Name\",\n  \"phone\": \"+628987654321\",\n  \"country\": \"Indonesia\",\n  \"address\": \"Jl. Updated Address No. 99\",\n  \"city\": \"Jakarta\",\n  \"postalCode\": \"12345\",\n  \"isActive\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/staff/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "staff", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "staff-uuid-here",
+                  "description": "Staff User ID"
+                }
+              ]
+            },
+            "description": "Update superadmin staff information. **Only accessible by superadmin-master**.\n\n**Updatable fields:**\n- email (with uniqueness validation)\n- firstName\n- lastName\n- phone\n- country\n- address\n- city\n- postalCode\n- isActive\n- password (optional)\n\n**Validation:**\n- Email must be unique (409 Conflict if already used)\n- Cannot update superadmin-master accounts\n\n**Cannot update:**\n- role (always superadmin-staff)"
+          },
+          "response": []
+        },
+        {
+          "name": "5b. Update Staff with Avatar (form-data)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "email",
+                  "value": "updatedemail@example.com",
+                  "type": "text",
+                  "description": "New email (must be unique)"
+                },
+                {
+                  "key": "firstName",
+                  "value": "Updated",
+                  "type": "text"
+                },
+                {
+                  "key": "lastName",
+                  "value": "Name",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "+628987654321",
+                  "type": "text"
+                },
+                {
+                  "key": "country",
+                  "value": "Indonesia",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "Jl. Updated Address",
+                  "type": "text"
+                },
+                {
+                  "key": "city",
+                  "value": "Jakarta",
+                  "type": "text"
+                },
+                {
+                  "key": "postalCode",
+                  "value": "12345",
+                  "type": "text"
+                },
+                {
+                  "key": "avatar",
+                  "type": "file",
+                  "src": [],
+                  "description": "Upload new avatar (optional)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/staff/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "staff", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "staff-uuid-here",
+                  "description": "Staff User ID"
+                }
+              ]
+            },
+            "description": "**Update staff with new avatar photo**\n\n✅ **Features:**\n- Update email (with uniqueness validation)\n- Upload new avatar (old avatar deleted automatically)\n- Automatic compression\n- All fields optional\n\n📸 **Avatar Upload:**\n- Supported formats: JPG, JPEG, PNG, GIF, WEBP\n- Max size: 5MB before compression\n- Output: 500x500px max, JPEG 85% quality\n\n⚠️ **Email Validation:**\n- Email must be unique\n- Returns 409 Conflict if email already used\n\n**Note:** If you don't upload new avatar, existing avatar remains unchanged."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Delete Staff",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/staff/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "staff", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "staff-uuid-here",
+                  "description": "Staff User ID"
+                }
+              ]
+            },
+            "description": "Delete superadmin staff account. **Only accessible by superadmin-master**.\n\nCannot delete superadmin-master accounts."
+          },
+          "response": []
+        },
+        {
+          "name": "7. Bulk Delete Staff",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"ids\": [\n    \"staff-uuid-1\",\n    \"staff-uuid-2\",\n    \"staff-uuid-3\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/staff/bulk-delete",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "staff", "bulk-delete"]
+            },
+            "description": "**Delete multiple staff accounts at once**\n\n✅ **Features:**\n- Delete up to multiple users in single request\n- Automatic avatar cleanup for all deleted users\n- Transaction-based (all or nothing)\n- Protected against deleting superadmin-master\n\n**Request Body:**\n```json\n{\n  \"ids\": [\"uuid-1\", \"uuid-2\", \"uuid-3\"]\n}\n```\n\n**Validation:**\n- At least 1 ID required\n- All IDs must be valid UUIDs\n- Cannot delete superadmin-master accounts\n- Returns error if any ID is superadmin-master\n\n**Response:**\n```json\n{\n  \"message\": \"Successfully deleted 3 user(s)\",\n  \"deletedCount\": 3,\n  \"requestedIds\": 3\n}\n```\n\n**Error Cases:**\n- 404: No users found with provided IDs\n- 400: List contains superadmin-master account(s)\n- 400: IDs array is empty\n- 401: Not authenticated\n- 403: Not superadmin-master role"
+          },
+          "response": []
+        }
+      ],
+      "description": "Superadmin Staff Management endpoints. **Only accessible by superadmin-master role**.\n\n**Role Hierarchy:**\n- `superadmin-master`: Full control, can manage staff\n- `superadmin-staff`: Full system access, cannot manage staff\n\n**Permissions:**\n- Create staff: Master only\n- Update staff: Master only\n- Delete staff: Master only\n- Staff cannot create other accounts"
     },
     {
       "name": "Superadmin - Pricing Plans",
