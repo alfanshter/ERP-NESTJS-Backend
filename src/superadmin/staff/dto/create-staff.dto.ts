@@ -6,7 +6,8 @@ export class CreateSuperadminStaffDto {
 
   @IsString()
   @MinLength(8)
-  password: string;
+  @IsOptional()
+  password?: string;
 
   @IsString()
   firstName: string;

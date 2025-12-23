@@ -582,14 +582,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"staff1@erp.com\",\n  \"password\": \"Staff123!\",\n  \"firstName\": \"Staff\",\n  \"lastName\": \"One\",\n  \"phone\": \"+628123456789\",\n  \"country\": \"Indonesia\",\n  \"address\": \"Jl. Sudirman No. 123\",\n  \"city\": \"Jakarta\",\n  \"postalCode\": \"12345\"\n}"
+              "raw": "{\n  \"email\": \"staff1@erp.com\",\n  \"firstName\": \"Staff\",\n  \"lastName\": \"One\",\n  \"phone\": \"+628123456789\",\n  \"country\": \"Indonesia\",\n  \"address\": \"Jl. Sudirman No. 123\",\n  \"city\": \"Jakarta\",\n  \"postalCode\": \"12345\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/superadmin/staff",
               "host": ["{{base_url}}"],
               "path": ["superadmin", "staff"]
             },
-            "description": "Create new superadmin staff account. **Only accessible by superadmin-master**.\n\nThe created staff will have role `superadmin-staff` with full system access but cannot create other superadmin accounts.\n\n**Required fields:**\n- email\n- password (min 8 characters)\n- firstName\n- lastName\n\n**Optional fields:**\n- phone\n- country\n- address\n- city\n- postalCode\n- avatar"
+            "description": "Create new superadmin staff account. **Only accessible by superadmin-master**.\n\nThe created staff will have role `superadmin-staff` with full system access but cannot create other superadmin accounts.\n\n**Default Password:**\n- Password automatically set to: `admin123`\n- Staff can change password after first login\n- No need to provide password in request\n\n**Required fields:**\n- email\n- firstName\n- lastName\n\n**Optional fields:**\n- password (if not provided, defaults to \"admin123\")\n- phone\n- country\n- address\n- city\n- postalCode\n- avatar"
           },
           "response": []
         },
@@ -614,11 +614,6 @@
                 {
                   "key": "email",
                   "value": "staff10@erp.com",
-                  "type": "text"
-                },
-                {
-                  "key": "password",
-                  "value": "Staff123!",
                   "type": "text"
                 },
                 {
@@ -669,7 +664,7 @@
               "host": ["{{base_url}}"],
               "path": ["superadmin", "staff"]
             },
-            "description": "**Create staff with avatar photo upload**\n\n✅ **Features:**\n- Automatic image compression (max 500x500px)\n- Convert to JPEG format with 85% quality\n- Reduces file size significantly\n- High quality result\n\n📸 **Avatar Upload:**\n- Supported formats: JPG, JPEG, PNG, GIF, WEBP\n- Max size before compression: 5MB\n- After compression: ~50-200KB (depends on image)\n- Output: 500x500px max (maintains aspect ratio)\n\n**How to use:**\n1. Click on \"avatar\" field\n2. Click \"Select Files\"\n3. Choose an image file\n4. Send request\n\n**Note:** Avatar is optional. You can use regular JSON request if no photo needed."
+            "description": "**Create staff with avatar photo upload**\n\n✅ **Features:**\n- Default password: `admin123` (no need to provide)\n- Automatic image compression (max 500x500px)\n- Convert to JPEG format with 85% quality\n- Reduces file size significantly\n- High quality result\n\n🔐 **Default Password:**\n- Automatically set to: `admin123`\n- Staff can change password after login\n- Optional: Can provide custom password in form-data\n\n📸 **Avatar Upload:**\n- Supported formats: JPG, JPEG, PNG, GIF, WEBP\n- Max size before compression: 5MB\n- After compression: ~50-200KB (depends on image)\n- Output: 500x500px max (maintains aspect ratio)\n\n**How to use:**\n1. Click on \"avatar\" field\n2. Click \"Select Files\"\n3. Choose an image file\n4. Send request\n\n**Note:** Avatar is optional. You can use regular JSON request if no photo needed."
           },
           "response": []
         },

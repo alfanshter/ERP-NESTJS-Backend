@@ -28,8 +28,9 @@ export class StaffService {
       throw new NotFoundException('Superadmin-staff role not found. Please run seeder.');
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(createStaffDto.password, 10);
+    // Use default password if not provided
+    const passwordToHash = createStaffDto.password || 'admin123';
+    const hashedPassword = await bcrypt.hash(passwordToHash, 10);
 
     // Create user with superadmin-staff role
     const user = await this.prisma.user.create({
