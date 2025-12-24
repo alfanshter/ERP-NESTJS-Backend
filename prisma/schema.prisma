@@ -77,19 +77,27 @@ model User {
 // ==================== PRICING & SUBSCRIPTION ====================
 
 model PricingPlan {
-  id            String         @id @default(uuid())
-  name          String         @unique
-  description   String?
-  price         Float
-  billingPeriod BillingPeriod  @default(MONTHLY)
-  features      Json // Store features as JSON array
-  maxUsers      Int            @default(10)
-  maxProjects   Int            @default(100)
-  maxStorage    Int            @default(10) // in GB
-  isActive      Boolean        @default(true)
-  subscriptions Subscription[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+  id                 String         @id @default(uuid())
+  name               String         @unique
+  description        String?
+  monthlyPrice       Float // Harga per bulan
+  yearlyPrice        Float // Harga per tahun
+  monthlyDiscount    Float?         @default(0) // Diskon untuk monthly dalam persen (0-100) atau nominal
+  yearlyDiscount     Float?         @default(0) // Diskon untuk yearly dalam persen (0-100) atau nominal
+  discountType       DiscountType   @default(PERCENTAGE) // Tipe diskon: PERCENTAGE atau FIXED
+  features           Json // Store features as JSON array
+  maxUsers           Int            @default(10)
+  maxProjects        Int            @default(100)
+  maxStorage         Int            @default(10) // in GB
+  isActive           Boolean        @default(true)
+  subscriptions      Subscription[]
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+}
+
+enum DiscountType {
+  PERCENTAGE // Diskon dalam persen
+  FIXED      // Diskon nominal tetap
 }
 
 enum BillingPeriod {
@@ -99,24 +107,61 @@ enum BillingPeriod {
 }
 
 model Subscription {
-  id            String             @id @default(uuid())
-  planId        String
-  plan          PricingPlan        @relation(fields: [planId], references: [id])
-  company       Company?
-  status        SubscriptionStatus @default(TRIAL)
-  startDate     DateTime           @default(now())
-  endDate       DateTime?
-  trialEndDate  DateTime?
-  autoRenew     Boolean            @default(true)
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
+  id             String             @id @default(uuid())
+  planId         String
+  plan           PricingPlan        @relation(fields: [planId], references: [id])
+  company        Company?
+  billingPeriod  BillingPeriod      @default(MONTHLY) // MONTHLY atau YEARLY
+  price          Float // Harga yang dibayar (sudah include diskon)
+  status         SubscriptionStatus @default(TRIAL)
+  startDate      DateTime           @default(now())
+  endDate        DateTime?
+  trialEndDate   DateTime?
+  autoRenew      Boolean            @default(true)
+  lastPaymentAt  DateTime? // Tanggal pembayaran terakhir
+  nextBillingAt  DateTime? // Tanggal billing berikutnya
+  payments       Payment[] // Relasi ke payments
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
 }
 
 enum SubscriptionStatus {
+  PENDING // Menunggu pembayaran
   TRIAL
   ACTIVE
   EXPIRED
   CANCELLED
+}
+
+model Payment {
+  id                String        @id @default(uuid())
+  subscriptionId    String
+  subscription      Subscription  @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  amount            Float
+  paymentMethod     String? // Credit Card, Bank Transfer, E-Wallet, dll
+  paymentGateway    String? // Midtrans, Xendit, dll (untuk integrasi nanti)
+  status            PaymentStatus @default(PENDING)
+  transactionId     String?       @unique // ID dari payment gateway (untuk tracking)
+  paymentProof      String? // URL ke bukti transfer (jika manual transfer)
+  paidAt            DateTime? // Tanggal pembayaran berhasil
+  expiresAt         DateTime? // Expired time untuk pending payment
+  notes             String? // Catatan tambahan
+  metadata          Json? // Data tambahan dari payment gateway
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  @@index([subscriptionId])
+  @@index([status])
+  @@index([transactionId])
+}
+
+enum PaymentStatus {
+  PENDING // Menunggu pembayaran
+  PROCESSING // Sedang diproses
+  SUCCESS // Pembayaran berhasil
+  FAILED // Pembayaran gagal
+  EXPIRED // Pembayaran expired
+  CANCELLED // Pembayaran dibatalkan
 }
 
 // ==================== EMPLOYEE MANAGEMENT ====================

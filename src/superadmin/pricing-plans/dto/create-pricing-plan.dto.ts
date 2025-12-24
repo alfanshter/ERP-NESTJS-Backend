@@ -8,10 +8,9 @@ import {
   Min,
 } from 'class-validator';
 
-export enum BillingPeriod {
-  MONTHLY = 'MONTHLY',
-  YEARLY = 'YEARLY',
-  LIFETIME = 'LIFETIME',
+export enum DiscountType {
+  PERCENTAGE = 'PERCENTAGE', // Diskon dalam persen (0-100)
+  FIXED = 'FIXED', // Diskon nominal tetap
 }
 
 export class CreatePricingPlanDto {
@@ -24,10 +23,25 @@ export class CreatePricingPlanDto {
 
   @IsNumber()
   @Min(0)
-  price: number;
+  monthlyPrice: number;
 
-  @IsEnum(BillingPeriod)
-  billingPeriod: BillingPeriod;
+  @IsNumber()
+  @Min(0)
+  yearlyPrice: number;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  monthlyDiscount?: number; // Diskon untuk monthly
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  yearlyDiscount?: number; // Diskon untuk yearly
+
+  @IsEnum(DiscountType)
+  @IsOptional()
+  discountType?: DiscountType; // PERCENTAGE atau FIXED (default: PERCENTAGE)
 
   @IsArray()
   features: string[];

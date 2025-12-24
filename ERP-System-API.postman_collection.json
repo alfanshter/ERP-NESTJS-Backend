@@ -230,6 +230,218 @@
       "name": "Superadmin - Companies",
       "item": [
         {
+          "name": "Company Users",
+          "item": [
+            {
+              "name": "1. Get Company Users",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/superadmin/companies/:companyId/users?page=1&limit=10",
+                  "host": ["{{base_url}}"],
+                  "path": ["superadmin", "companies", ":companyId", "users"],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "1",
+                      "description": "Page number"
+                    },
+                    {
+                      "key": "limit",
+                      "value": "10",
+                      "description": "Items per page"
+                    },
+                    {
+                      "key": "search",
+                      "value": "john",
+                      "disabled": true,
+                      "description": "Search by email/firstName/lastName"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "companyId",
+                      "value": "company-uuid-here",
+                      "description": "Company ID"
+                    }
+                  ]
+                },
+                "description": "List users that belong to a specific company (pagination + optional search)."
+              },
+              "response": []
+            },
+            {
+              "name": "2. Create Company User",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"user1@company.com\",\n  \"firstName\": \"User\",\n  \"lastName\": \"Company\",\n  \"phone\": \"+628123456789\",\n  \"country\": \"Indonesia\",\n  \"address\": \"Jl. Sudirman No. 1\",\n  \"city\": \"Jakarta\",\n  \"postalCode\": \"10110\",\n  \"roleName\": \"staff\",\n  \"isActive\": true\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/superadmin/companies/:companyId/users",
+                  "host": ["{{base_url}}"],
+                  "path": ["superadmin", "companies", ":companyId", "users"],
+                  "variable": [
+                    {
+                      "key": "companyId",
+                      "value": "company-uuid-here",
+                      "description": "Company ID"
+                    }
+                  ]
+                },
+                "description": "Create a new user under a specific company.\n\nNotes:\n- password is optional; if omitted backend uses default \"admin123\"\n- roleName must be existing role (e.g. admin/manager/staff)\n- cannot assign superadmin roles"
+              },
+              "response": []
+            },
+            {
+              "name": "3. Get Company User By ID",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/superadmin/companies/:companyId/users/:userId",
+                  "host": ["{{base_url}}"],
+                  "path": ["superadmin", "companies", ":companyId", "users", ":userId"],
+                  "variable": [
+                    {
+                      "key": "companyId",
+                      "value": "company-uuid-here",
+                      "description": "Company ID"
+                    },
+                    {
+                      "key": "userId",
+                      "value": "user-uuid-here",
+                      "description": "Company User ID"
+                    }
+                  ]
+                },
+                "description": "Get a single company user by ID (must belong to the specified company)."
+              },
+              "response": []
+            },
+            {
+              "name": "4. Update Company User",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "PATCH",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"firstName\": \"Updated\",\n  \"lastName\": \"User\",\n  \"email\": \"updated-user1@company.com\",\n  \"phone\": \"+628987654321\",\n  \"isActive\": true\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/superadmin/companies/:companyId/users/:userId",
+                  "host": ["{{base_url}}"],
+                  "path": ["superadmin", "companies", ":companyId", "users", ":userId"],
+                  "variable": [
+                    {
+                      "key": "companyId",
+                      "value": "company-uuid-here",
+                      "description": "Company ID"
+                    },
+                    {
+                      "key": "userId",
+                      "value": "user-uuid-here",
+                      "description": "Company User ID"
+                    }
+                  ]
+                },
+                "description": "Update company user (partial).\n\nNotes:\n- if updating email, must be globally unique\n- roleName can be updated but cannot be superadmin roles\n- password can be updated (min 8)"
+              },
+              "response": []
+            },
+            {
+              "name": "5. Delete Company User",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{token}}",
+                      "type": "string"
+                    }
+                  ]
+                },
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/superadmin/companies/:companyId/users/:userId",
+                  "host": ["{{base_url}}"],
+                  "path": ["superadmin", "companies", ":companyId", "users", ":userId"],
+                  "variable": [
+                    {
+                      "key": "companyId",
+                      "value": "company-uuid-here",
+                      "description": "Company ID"
+                    },
+                    {
+                      "key": "userId",
+                      "value": "user-uuid-here",
+                      "description": "Company User ID"
+                    }
+                  ]
+                },
+                "description": "Delete a company user (must belong to the company)."
+              },
+              "response": []
+            }
+          ],
+          "description": "Manage users registered under a specific company.\n\nBase: /superadmin/companies/:companyId/users\n\nAll endpoints require Superadmin auth (Bearer {{token}})."
+        },
+        {
           "name": "1. Create Company",
           "request": {
             "auth": {
@@ -980,14 +1192,14 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Premium\",\n  \"description\": \"Premium plan for enterprise\",\n  \"price\": 299.99,\n  \"billingPeriod\": \"MONTHLY\",\n  \"features\": [\n    \"Unlimited users\",\n    \"Unlimited projects\",\n    \"1TB storage\",\n    \"24/7 Priority support\",\n    \"Custom integrations\"\n  ],\n  \"maxUsers\": 999,\n  \"maxProjects\": 9999,\n  \"maxStorage\": 1000,\n  \"isActive\": true\n}"
+              "raw": "{\n  \"name\": \"Premium\",\n  \"description\": \"Premium plan for enterprise\",\n  \"monthlyPrice\": 200000,\n  \"yearlyPrice\": 1500000,\n  \"monthlyDiscount\": 10,\n  \"yearlyDiscount\": 37.5,\n  \"discountType\": \"PERCENTAGE\",\n  \"features\": [\n    \"Unlimited users\",\n    \"Unlimited projects\",\n    \"1TB storage\",\n    \"24/7 Priority support\",\n    \"Custom integrations\"\n  ],\n  \"maxUsers\": 999,\n  \"maxProjects\": 9999,\n  \"maxStorage\": 1000,\n  \"isActive\": true\n}"
             },
             "url": {
               "raw": "{{base_url}}/superadmin/pricing-plans",
               "host": ["{{base_url}}"],
               "path": ["superadmin", "pricing-plans"]
             },
-            "description": "Buat pricing plan baru. Billing: MONTHLY, YEARLY, LIFETIME"
+            "description": "Buat pricing plan baru.\n\n**Struktur Harga:**\n- `monthlyPrice`: Harga per bulan (misal: 200000)\n- `yearlyPrice`: Harga per tahun (misal: 2400000 atau 1500000 dengan diskon)\n- `monthlyDiscount`: Diskon untuk monthly (optional)\n- `yearlyDiscount`: Diskon untuk yearly (optional)\n- `discountType`: PERCENTAGE (0-100) atau FIXED (nominal)\n\n**Contoh:**\n- Monthly: Rp 200.000, diskon 10% → Final: Rp 180.000\n- Yearly: Rp 2.400.000 (12 × 200k), diskon 37.5% → Final: Rp 1.500.000\n\n**Response akan include:**\n- `finalMonthlyPrice`: Harga final setelah diskon monthly\n- `finalYearlyPrice`: Harga final setelah diskon yearly"
           },
           "response": []
         },
@@ -1075,7 +1287,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"price\": 89.99,\n  \"maxUsers\": 25\n}"
+              "raw": "{\n  \"monthlyPrice\": 180000,\n  \"yearlyPrice\": 1400000,\n  \"monthlyDiscount\": 0,\n  \"yearlyDiscount\": 35,\n  \"discountType\": \"PERCENTAGE\",\n  \"maxUsers\": 25\n}"
             },
             "url": {
               "raw": "{{base_url}}/superadmin/pricing-plans/:id",
@@ -1126,6 +1338,283 @@
         }
       ],
       "description": "Pricing plan management untuk superadmin"
+    },
+    {
+      "name": "Superadmin - Subscriptions",
+      "item": [
+        {
+          "name": "1. Create Subscription",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"plan-uuid-here\",\n  \"companyId\": \"company-uuid-here\",\n  \"billingPeriod\": \"MONTHLY\",\n  \"autoRenew\": true,\n  \"startDate\": \"2025-01-01T00:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/subscriptions",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "subscriptions"]
+            },
+            "description": "**Buat subscription baru untuk company**\n\n**🔄 UPDATED - Payment Flow:**\nSubscription dibuat dengan status **PENDING** (menunggu pembayaran).\n\n**Flow:**\n1. ✅ Create Subscription → Status: PENDING\n2. 💳 Create Payment → Generate payment record\n3. ✅ Process Payment → Subscription status → ACTIVE\n\n**Business Rules:**\n- ❗ 1 company hanya bisa punya 1 active/trial subscription\n- Subscription tidak langsung active, butuh payment dulu\n- Akan throw ConflictException jika company sudah punya active subscription\n\n**Billing Period:**\n- `MONTHLY`: Monthly billing dengan harga monthlyPrice dari plan\n- `YEARLY`: Yearly billing dengan harga yearlyPrice dari plan\n\n**Price Calculation:**\n- Sistem otomatis menghitung harga final berdasarkan:\n  - Plan's monthlyPrice/yearlyPrice\n  - Discount (monthlyDiscount/yearlyDiscount)\n  - DiscountType (PERCENTAGE atau FIXED)\n\n**Auto-calculated Fields:**\n- `price`: Final price setelah discount\n- `status`: PENDING (akan jadi ACTIVE setelah payment)\n- `endDate`: Tanggal berakhir subscription\n  - MONTHLY: startDate + 1 month (misal: 1 Jan → 1 Feb, akses terakhir 1 Feb, putus 2 Feb)\n  - YEARLY: startDate + 1 year (misal: 1 Jan 2025 → 1 Jan 2026, akses terakhir 1 Jan 2026)\n- `nextBillingAt`: Same as endDate (untuk renewal)\n\n**Example:**\nPlan: Rp 200.000/month, diskon 10%\n- MONTHLY → price: Rp 180.000, berlangganan 1 Jan → expire 1 Feb\n- YEARLY (Rp 2.160.000 - 10%) → price: Rp 1.944.000, berlangganan 1 Jan → expire 1 Jan tahun depan\n\n**⚠️ Important:**\nAkses terputus pada hari SETELAH endDate. Misal endDate 1 Feb, maka:\n- ✅ 1 Feb: Masih bisa akses\n- ❌ 2 Feb: Sudah tidak bisa akses (expired)\n\n**📌 Next Step:**\nSetelah create subscription, lanjut ke **Superadmin - Payments** untuk create payment & process payment."
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get All Subscriptions",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/subscriptions?page=1&limit=10&status=ACTIVE",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "subscriptions"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "description": "Filter by status: TRIAL, ACTIVE, EXPIRED, CANCELLED (optional)"
+                }
+              ]
+            },
+            "description": "**List semua subscriptions dengan pagination**\n\n**Query Parameters:**\n- `page`: Page number (default: 1)\n- `limit`: Items per page (default: 10)\n- `status`: Filter by subscription status (optional)\n\n**Status Values:**\n- `TRIAL`: Trial period\n- `ACTIVE`: Active subscription\n- `EXPIRED`: Expired subscription\n- `CANCELLED`: Cancelled subscription\n\n**Response includes:**\n- Subscription details\n- Related plan details (name, monthly/yearly price)\n- Related company details (name, email)\n- Pagination metadata (total, page, limit, totalPages)"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Subscription by ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/subscriptions/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "subscriptions", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "subscription-uuid-here",
+                  "description": "Subscription ID"
+                }
+              ]
+            },
+            "description": "**Get detail subscription by ID**\n\n**Response includes:**\n- Complete subscription details\n- Related pricing plan (name, features, prices)\n- Related company (name, email, phone)\n- Billing information (price, period, dates)\n- Status and auto-renewal settings"
+          },
+          "response": []
+        },
+        {
+          "name": "3b. Get Subscription by Company ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/subscriptions/company/:companyId",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "subscriptions", "company", ":companyId"],
+              "variable": [
+                {
+                  "key": "companyId",
+                  "value": "company-uuid-here",
+                  "description": "Company ID"
+                }
+              ]
+            },
+            "description": "**Get subscription berdasarkan Company ID**\n\n**Use Case:**\n- Melihat subscription status dari halaman detail company\n- Check apakah company punya active subscription\n- Get billing information untuk specific company\n\n**Response includes:**\n- Company details (id, name, email, phone, status)\n- Subscription details (if exists)\n- Related pricing plan information\n- Billing period and price\n\n**Response if no subscription:**\n```json\n{\n  \"company\": {\n    \"id\": \"...\",\n    \"name\": \"Company Name\",\n    \"email\": \"company@email.com\"\n  },\n  \"subscription\": null,\n  \"message\": \"Company does not have an active subscription\"\n}\n```\n\n**Response if has subscription:**\n```json\n{\n  \"company\": {\n    \"id\": \"...\",\n    \"name\": \"Company Name\",\n    \"email\": \"company@email.com\"\n  },\n  \"subscription\": {\n    \"id\": \"...\",\n    \"planId\": \"...\",\n    \"billingPeriod\": \"MONTHLY\",\n    \"price\": 180000,\n    \"status\": \"ACTIVE\",\n    \"plan\": {\n      \"name\": \"Starter\",\n      \"monthlyPrice\": 200000,\n      \"features\": [...]\n    }\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Update Subscription",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"billingPeriod\": \"YEARLY\",\n  \"autoRenew\": false,\n  \"status\": \"ACTIVE\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/subscriptions/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "subscriptions", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "subscription-uuid-here",
+                  "description": "Subscription ID"
+                }
+              ]
+            },
+            "description": "**Update subscription (partial update)**\n\n**Updatable Fields:**\n- `billingPeriod`: MONTHLY or YEARLY\n- `autoRenew`: true or false\n- `status`: TRIAL, ACTIVE, EXPIRED, CANCELLED\n- `startDate`: Change start date\n- `endDate`: Set end date (for manual expiry)\n\n**Smart Recalculation:**\n- Jika `billingPeriod` berubah:\n  - Price otomatis dihitung ulang dari plan\n  - nextBillingAt dihitung ulang (MONTHLY: +1 month, YEARLY: +1 year)\n\n**Example:**\nChange MONTHLY → YEARLY:\n- Old: Rp 180.000/month\n- New: Rp 1.944.000/year (otomatis dihitung dari plan's yearlyPrice + discount)"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Cancel Subscription",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/subscriptions/:id/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "subscriptions", ":id", "cancel"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "subscription-uuid-here",
+                  "description": "Subscription ID"
+                }
+              ]
+            },
+            "description": "**Cancel subscription**\n\n**Actions performed:**\n- Status → CANCELLED\n- autoRenew → false\n- endDate → current timestamp\n\n**Note:**\n- Company masih bisa akses sampai endDate\n- Tidak menghapus data subscription\n- Bisa di-reactivate dengan update status\n\n**Use Case:**\n- User request cancellation\n- Payment failure\n- Violation of terms"
+          },
+          "response": []
+        },
+        {
+          "name": "6. Delete Subscription",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/subscriptions/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "subscriptions", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "subscription-uuid-here",
+                  "description": "Subscription ID"
+                }
+              ]
+            },
+            "description": "**Hapus subscription permanently**\n\n**⚠️ WARNING:**\n- Permanent deletion\n- Removes company.subscriptionId reference\n- Cannot be undone\n\n**Before deleting:**\n- Consider cancelling instead of deleting\n- Backup subscription data if needed\n\n**Use Case:**\n- Test data cleanup\n- Incorrect subscription creation\n- Company account deletion"
+          },
+          "response": []
+        },
+        {
+          "name": "7. Example - Create with Seeder Data",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"planId\": \"{{planId}}\",\n  \"companyId\": \"{{companyId}}\",\n  \"billingPeriod\": \"YEARLY\",\n  \"autoRenew\": true,\n  \"startDate\": \"2025-01-01T00:00:00.000Z\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/subscriptions",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "subscriptions"]
+            },
+            "description": "**Example menggunakan data dari seeder**\n\n**Cara menggunakan:**\n1. Ambil planId dari GET /superadmin/pricing-plans\n2. Ambil companyId dari GET /superadmin/companies\n3. Set ke collection variables:\n   - `{{planId}}`: ID dari pricing plan (misal: Starter)\n   - `{{companyId}}`: ID dari company (misal: Demo Company)\n\n**Test Case - Starter Plan (YEARLY):**\n- Monthly Price: Rp 200.000\n- Yearly Price: Rp 2.160.000\n- Yearly Discount: 10%\n- **Final Price: Rp 1.944.000/year**\n\n**Expected Response:**\n```json\n{\n  \"id\": \"...\",\n  \"planId\": \"...\",\n  \"companyId\": \"...\",\n  \"billingPeriod\": \"YEARLY\",\n  \"price\": 1944000,\n  \"startDate\": \"2025-01-01T00:00:00.000Z\",\n  \"nextBillingAt\": \"2026-01-01T00:00:00.000Z\",\n  \"status\": \"ACTIVE\",\n  \"autoRenew\": true\n}\n```"
+          },
+          "response": []
+        }
+      ],
+      "description": "**Subscription Management untuk Superadmin**\n\n**Business Rules:**\n- 🔒 1 company = 1 active subscription only\n- 💰 Price auto-calculated dari pricing plan + billing period + discount\n- 📅 Next billing date auto-calculated\n- ♻️ Support auto-renewal\n\n**Workflow:**\n1. Create subscription → System validates no active subscription exists\n2. System calculates price from plan's monthly/yearly price + discount\n3. System calculates next billing date\n4. Company.subscriptionId updated\n\n**Key Features:**\n- Flexible billing (MONTHLY/YEARLY)\n- Automatic price calculation\n- Subscription lifecycle management\n- Conflict prevention (1 active subscription rule)\n- Cancellation support"
     },
     {
       "name": "Superadmin - Dashboard",
@@ -1235,6 +1724,225 @@
         }
       ],
       "description": "Dashboard analytics untuk superadmin"
+    },
+    {
+      "name": "Superadmin - Payments",
+      "item": [
+        {
+          "name": "1. Create Payment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subscriptionId\": \"subscription-uuid-here\",\n  \"amount\": 180000,\n  \"paymentMethod\": \"Bank Transfer\",\n  \"paymentGateway\": \"Manual\",\n  \"notes\": \"Payment for monthly subscription\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/payments",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "payments"]
+            },
+            "description": "**Create payment untuk subscription**\n\n**Flow:**\n1. User pilih plan → Create subscription (status: PENDING)\n2. Create payment → Generate payment record (status: PENDING)\n3. Payment expires dalam 24 jam\n\n**Payment Methods:**\n- Bank Transfer\n- Credit Card\n- E-Wallet (GoPay, OVO, Dana, dll)\n- Virtual Account\n\n**Payment Status:**\n- PENDING: Menunggu pembayaran\n- PROCESSING: Sedang diproses\n- SUCCESS: Pembayaran berhasil\n- FAILED: Pembayaran gagal\n- EXPIRED: Pembayaran expired\n- CANCELLED: Pembayaran dibatalkan\n\n**Response:**\n```json\n{\n  \"id\": \"payment-uuid\",\n  \"subscriptionId\": \"...\",\n  \"amount\": 180000,\n  \"status\": \"PENDING\",\n  \"expiresAt\": \"2025-01-02T00:00:00.000Z\",\n  \"subscription\": {\n    \"id\": \"...\",\n    \"status\": \"PENDING\",\n    \"plan\": {...},\n    \"company\": {...}\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Process Payment (Mock Success)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transactionId\": \"TRX-2025-001\",\n  \"notes\": \"Payment confirmed\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/superadmin/payments/:id/process",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "payments", ":id", "process"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "payment-uuid-here",
+                  "description": "Payment ID"
+                }
+              ]
+            },
+            "description": "**Mock payment success (simulasi payment gateway)**\n\n**⚠️ DEVELOPMENT ONLY:**\nEndpoint ini untuk simulasi payment gateway sebelum integrasi dengan Midtrans/Xendit.\n\n**What happens:**\n1. Payment status → SUCCESS\n2. Set paidAt to current timestamp\n3. Generate transactionId (atau gunakan dari body)\n4. **Activate subscription** → status PENDING → ACTIVE\n5. Update lastPaymentAt di subscription\n\n**Production Flow (nanti):**\n- Payment gateway (Midtrans/Xendit) kirim webhook\n- Webhook handler verify signature\n- Update payment & subscription status\n\n**Response:**\n```json\n{\n  \"id\": \"payment-uuid\",\n  \"status\": \"SUCCESS\",\n  \"paidAt\": \"2025-01-01T10:00:00.000Z\",\n  \"transactionId\": \"TRX-2025-001\"\n}\n```\n\n**Subscription auto-activated!** ✅"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get All Payments",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/payments?page=1&limit=10&status=SUCCESS",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "payments"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page"
+                },
+                {
+                  "key": "status",
+                  "value": "SUCCESS",
+                  "description": "Filter by status: PENDING, PROCESSING, SUCCESS, FAILED, EXPIRED, CANCELLED (optional)"
+                },
+                {
+                  "key": "subscriptionId",
+                  "value": "",
+                  "description": "Filter by subscription ID (optional)",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "**List semua payments dengan pagination & filters**\n\n**Query Parameters:**\n- `page`: Page number (default: 1)\n- `limit`: Items per page (default: 10)\n- `status`: Filter by payment status (optional)\n- `subscriptionId`: Filter by subscription (optional)\n\n**Response includes:**\n- Payment details\n- Related subscription info\n- Related plan & company\n- Pagination metadata"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Payment by ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/payments/:id",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "payments", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "payment-uuid-here",
+                  "description": "Payment ID"
+                }
+              ]
+            },
+            "description": "**Get detail payment by ID**\n\n**Response includes:**\n- Complete payment details\n- Transaction info\n- Payment method & gateway\n- Related subscription with plan & company\n- Payment proof (if uploaded)\n- Timestamps (created, paid, expired)"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Get Payments by Subscription",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/payments/subscription/:subscriptionId",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "payments", "subscription", ":subscriptionId"],
+              "variable": [
+                {
+                  "key": "subscriptionId",
+                  "value": "subscription-uuid-here",
+                  "description": "Subscription ID"
+                }
+              ]
+            },
+            "description": "**Get payment history untuk specific subscription**\n\n**Use Case:**\n- Lihat riwayat pembayaran subscription\n- Track payment attempts (success/failed)\n- Audit trail pembayaran\n\n**Response:**\nArray of payments untuk subscription tersebut, sorted by createdAt desc."
+          },
+          "response": []
+        },
+        {
+          "name": "6. Cancel Payment",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/superadmin/payments/:id/cancel",
+              "host": ["{{base_url}}"],
+              "path": ["superadmin", "payments", ":id", "cancel"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "payment-uuid-here",
+                  "description": "Payment ID"
+                }
+              ]
+            },
+            "description": "**Cancel pending payment**\n\n**Business Rules:**\n- Hanya bisa cancel payment dengan status PENDING\n- Throw error jika status sudah SUCCESS/FAILED/etc\n\n**Actions:**\n- Status → CANCELLED\n- Subscription tetap PENDING (bisa create payment baru)\n\n**Use Case:**\n- User batalkan pembayaran\n- Payment method berubah\n- User mau coba payment method lain"
+          },
+          "response": []
+        }
+      ],
+      "description": "**Payment Management untuk Subscription**\n\n**Payment Flow:**\n1. 📋 Create Subscription → Status: PENDING\n2. 💳 Create Payment → Status: PENDING, expires 24h\n3. ✅ Process Payment (Mock) → Payment: SUCCESS, Subscription: ACTIVE\n\n**Mock Payment Gateway:**\n- Untuk development/testing\n- Simulasi payment success tanpa payment gateway real\n- Nanti replace dengan webhook dari Midtrans/Xendit\n\n**Payment Methods Supported:**\n- Bank Transfer\n- Credit Card\n- E-Wallet (GoPay, OVO, Dana)\n- Virtual Account\n\n**Ready for Integration:**\n- 🔜 Midtrans integration\n- 🔜 Xendit integration\n- 🔜 Webhook handler\n- 🔜 Payment proof upload (manual transfer)"
     }
   ]
 }

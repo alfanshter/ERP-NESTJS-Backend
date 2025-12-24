@@ -74,10 +74,10 @@ export class DashboardService {
     });
 
     const monthlyRevenue = activeSubscriptions.reduce((sum, sub) => {
-      if (sub.plan.billingPeriod === 'MONTHLY') {
-        return sum + sub.plan.price;
-      } else if (sub.plan.billingPeriod === 'YEARLY') {
-        return sum + sub.plan.price / 12; // Convert to monthly
+      if (sub.billingPeriod === 'MONTHLY') {
+        return sum + sub.price;
+      } else if (sub.billingPeriod === 'YEARLY') {
+        return sum + sub.price / 12; // Convert yearly to monthly
       }
       return sum;
     }, 0);
@@ -122,22 +122,33 @@ export class DashboardService {
 
   async getSubscriptionBreakdown() {
     const plans = await this.prisma.pricingPlan.findMany({
+      where: { isActive: true },
       include: {
-        _count: {
-          select: {
-            subscriptions: true,
-          },
+        subscriptions: {
+          where: { status: 'ACTIVE' },
         },
       },
     });
 
-    return plans.map((plan) => ({
-      planName: plan.name,
-      price: plan.price,
-      billingPeriod: plan.billingPeriod,
-      subscriptions: plan._count.subscriptions,
-      revenue: plan.price * plan._count.subscriptions,
-    }));
+    return plans.map((plan) => {
+      const monthlyRevenue = plan.subscriptions.reduce((sum, sub) => {
+        if (sub.billingPeriod === 'MONTHLY') {
+          return sum + sub.price;
+        } else if (sub.billingPeriod === 'YEARLY') {
+          return sum + sub.price / 12; // Convert to monthly
+        }
+        return sum;
+      }, 0);
+
+      return {
+        planName: plan.name,
+        monthlyPrice: plan.monthlyPrice,
+        yearlyPrice: plan.yearlyPrice,
+        subscriptions: plan.subscriptions.length,
+        monthlyRevenue: Math.round(monthlyRevenue * 100) / 100,
+        annualRevenue: Math.round(monthlyRevenue * 12 * 100) / 100,
+      };
+    });
   }
 
   async getCompanyStatusDistribution() {

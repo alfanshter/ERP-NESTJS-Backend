@@ -8,15 +8,24 @@ export class PricingPlansService {
   constructor(private prisma: PrismaService) {}
 
   async create(createPricingPlanDto: CreatePricingPlanDto) {
+    const data = {
+      ...createPricingPlanDto,
+      discountType:
+        (createPricingPlanDto.discountType as 'PERCENTAGE' | 'FIXED') ||
+        'PERCENTAGE',
+      monthlyDiscount: createPricingPlanDto.monthlyDiscount || 0,
+      yearlyDiscount: createPricingPlanDto.yearlyDiscount || 0,
+    };
+
     return this.prisma.pricingPlan.create({
-      data: createPricingPlanDto,
+      data,
     });
   }
 
   async findAll(includeInactive = false) {
     const where = includeInactive ? {} : { isActive: true };
 
-    return this.prisma.pricingPlan.findMany({
+    const plans = await this.prisma.pricingPlan.findMany({
       where,
       include: {
         _count: {
@@ -25,8 +34,23 @@ export class PricingPlansService {
           },
         },
       },
-      orderBy: { price: 'asc' },
+      orderBy: { monthlyPrice: 'asc' },
     });
+
+    // Add calculated final prices after discount
+    return plans.map((plan) => ({
+      ...plan,
+      finalMonthlyPrice: this.calculateFinalPrice(
+        plan.monthlyPrice,
+        plan.monthlyDiscount || 0,
+        plan.discountType,
+      ),
+      finalYearlyPrice: this.calculateFinalPrice(
+        plan.yearlyPrice,
+        plan.yearlyDiscount || 0,
+        plan.discountType,
+      ),
+    }));
   }
 
   async findOne(id: string) {
@@ -56,7 +80,20 @@ export class PricingPlansService {
       throw new NotFoundException(`Pricing plan with ID ${id} not found`);
     }
 
-    return plan;
+    // Add calculated final prices
+    return {
+      ...plan,
+      finalMonthlyPrice: this.calculateFinalPrice(
+        plan.monthlyPrice,
+        plan.monthlyDiscount || 0,
+        plan.discountType,
+      ),
+      finalYearlyPrice: this.calculateFinalPrice(
+        plan.yearlyPrice,
+        plan.yearlyDiscount || 0,
+        plan.discountType,
+      ),
+    };
   }
 
   async update(id: string, updatePricingPlanDto: UpdatePricingPlanDto) {
@@ -88,5 +125,30 @@ export class PricingPlansService {
     return this.prisma.pricingPlan.delete({
       where: { id },
     });
+  }
+
+  /**
+   * Calculate final price after discount
+   * @param originalPrice - Original price
+   * @param discount - Discount value (percentage 0-100 or fixed amount)
+   * @param discountType - PERCENTAGE or FIXED
+   */
+  private calculateFinalPrice(
+    originalPrice: number,
+    discount: number,
+    discountType: string,
+  ): number {
+    if (!discount || discount === 0) {
+      return originalPrice;
+    }
+
+    if (discountType === 'PERCENTAGE') {
+      // Diskon persentase (0-100)
+      const discountAmount = (originalPrice * discount) / 100;
+      return Math.max(0, originalPrice - discountAmount);
+    } else {
+      // Diskon nominal tetap
+      return Math.max(0, originalPrice - discount);
+    }
   }
 }

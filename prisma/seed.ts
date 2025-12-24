@@ -65,8 +65,11 @@ async function main() {
     {
       name: 'Starter',
       description: 'Perfect for small teams getting started',
-      price: 29.99,
-      billingPeriod: 'MONTHLY' as const,
+      monthlyPrice: 200000,
+      yearlyPrice: 2160000,
+      monthlyDiscount: 0,
+      yearlyDiscount: 10,
+      discountType: 'PERCENTAGE',
       maxUsers: 5,
       maxProjects: 10,
       maxStorage: 5,
@@ -81,8 +84,11 @@ async function main() {
     {
       name: 'Professional',
       description: 'For growing businesses',
-      price: 79.99,
-      billingPeriod: 'MONTHLY' as const,
+      monthlyPrice: 500000,
+      yearlyPrice: 4800000,
+      monthlyDiscount: 0,
+      yearlyDiscount: 20,
+      discountType: 'PERCENTAGE',
       maxUsers: 20,
       maxProjects: 50,
       maxStorage: 50,
@@ -99,8 +105,11 @@ async function main() {
     {
       name: 'Enterprise',
       description: 'For large organizations',
-      price: 199.99,
-      billingPeriod: 'MONTHLY' as const,
+      monthlyPrice: 1000000,
+      yearlyPrice: 9000000,
+      monthlyDiscount: 0,
+      yearlyDiscount: 25,
+      discountType: 'PERCENTAGE',
       maxUsers: 100,
       maxProjects: 999,
       maxStorage: 500,
@@ -126,7 +135,9 @@ async function main() {
       create: planData,
     })
     plans.push(plan)
-    console.log(`✅ Plan: ${plan.name} - $${plan.price}/${plan.billingPeriod}`)
+    console.log(
+      `✅ Plan: ${plan.name} - Monthly: Rp ${plan.monthlyPrice.toLocaleString('id-ID')}, Yearly: Rp ${plan.yearlyPrice.toLocaleString('id-ID')}`,
+    )
   }
 
   // ==================== MASTER SUPERADMIN USER (NO COMPANY) ====================
@@ -200,12 +211,31 @@ async function main() {
   const demoCompanyName = 'Demo Company'
 
   // Create subscription for demo company
+  const professionalPlan = plans[1]; // Professional plan
+  const startDate = new Date();
+  const yearlyDiscount = professionalPlan.yearlyDiscount || 0;
+  const discountType = professionalPlan.discountType || 'PERCENTAGE';
+  
+  // Calculate yearly price with discount
+  let finalPrice = professionalPlan.yearlyPrice;
+  if (yearlyDiscount > 0) {
+    if (discountType === 'PERCENTAGE') {
+      finalPrice = professionalPlan.yearlyPrice - (professionalPlan.yearlyPrice * yearlyDiscount / 100);
+    } else {
+      finalPrice = professionalPlan.yearlyPrice - yearlyDiscount;
+    }
+  }
+  
   const demoSubscription = await prisma.subscription.create({
     data: {
-      planId: plans[1].id, // Professional plan
+      planId: professionalPlan.id,
+      billingPeriod: 'YEARLY',
+      price: finalPrice,
       status: 'ACTIVE',
-      startDate: new Date(),
+      startDate: startDate,
       endDate: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000), // 1 year from now
+      lastPaymentAt: startDate,
+      nextBillingAt: new Date(startDate.getTime() + 365 * 24 * 60 * 60 * 1000),
       autoRenew: true,
     },
   })
