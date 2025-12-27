@@ -29,14 +29,19 @@ Enterprise Resource Planning (ERP) System Backend built with [Nest](https://gith
 
 - 🔐 **JWT Authentication** - Secure token-based authentication
 - 👥 **Role Hierarchy** - Superadmin master and staff management
-- 🏢 **Company Management** - Multi-company support with logo uploads
+- 🏢 **Company Management** - Multi-company support with auto-admin creation
+- 🔑 **Auto-Create Admin** - Automatic admin user creation with default password `admin123`
+- 👨‍💼 **Employee Management** - Complete CRUD with search, filter, and statistics
 - 💰 **Subscription System** - Pricing plans and subscriptions
 - 📁 **File Upload** - Logo management with automatic cleanup
 - 🔒 **Access Control** - Role-based guards and decorators
 - 📊 **PostgreSQL Database** - Prisma ORM for type-safe queries
+- 🌏 **Indonesian Regions** - 91,000+ regions autocomplete with hierarchy
 
 ### 📚 Documentation
 
+- **[COMPANY_ADMIN_AUTO_CREATE.md](./COMPANY_ADMIN_AUTO_CREATE.md)** - Auto-create admin user with default password
+- **[EMPLOYEE_MANAGEMENT_GUIDE.md](./EMPLOYEE_MANAGEMENT_GUIDE.md)** - Employee CRUD with search and stats
 - **[STAFF_MANAGEMENT_WORKFLOW.md](./STAFF_MANAGEMENT_WORKFLOW.md)** - Complete workflow guide for role hierarchy
 - **[POSTMAN_UPDATES.md](./POSTMAN_UPDATES.md)** - Postman collection enhancements
 - **[SUPERADMIN_HIERARCHY.md](./SUPERADMIN_HIERARCHY.md)** - Technical role implementation
@@ -48,6 +53,8 @@ Enterprise Resource Planning (ERP) System Backend built with [Nest](https://gith
 
 | Task | Documentation |
 |------|---------------|
+| Auto-create admin on company creation | [COMPANY_ADMIN_AUTO_CREATE.md](./COMPANY_ADMIN_AUTO_CREATE.md) |
+| Manage employees | [EMPLOYEE_MANAGEMENT_GUIDE.md](./EMPLOYEE_MANAGEMENT_GUIDE.md) |
 | Get started with superadmin roles | [STAFF_MANAGEMENT_WORKFLOW.md](./STAFF_MANAGEMENT_WORKFLOW.md) |
 | Test with Postman | [POSTMAN_UPDATES.md](./POSTMAN_UPDATES.md) |
 | Upload company logos | [LOGO_UPLOAD_API.md](./LOGO_UPLOAD_API.md) |

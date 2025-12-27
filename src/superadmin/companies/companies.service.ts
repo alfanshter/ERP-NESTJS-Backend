@@ -1,31 +1,112 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
 import { deleteFile } from '../../common/helpers/file-upload.helper';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class CompaniesService {
   constructor(private prisma: PrismaService) {}
 
+  /**
+   * Get default password for admin
+   */
+  private getDefaultPassword(): string {
+    return 'admin123';
+  }
+
   async create(createCompanyDto: CreateCompanyDto) {
-    return this.prisma.company.create({
-      data: createCompanyDto,
-      include: {
-        subscription: {
-          include: {
-            plan: true,
-          },
-        },
-        _count: {
-          select: {
-            users: true,
-            employees: true,
-            projects: true,
-          },
-        },
-      },
+    // Check if email already exists (for user)
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: createCompanyDto.email },
     });
+
+    if (existingUser) {
+      throw new ConflictException(
+        `Email ${createCompanyDto.email} is already registered`,
+      );
+    }
+
+    // Check if company name already exists
+    const existingCompany = await this.prisma.company.findUnique({
+      where: { name: createCompanyDto.name },
+    });
+
+    if (existingCompany) {
+      throw new ConflictException(
+        `Company name ${createCompanyDto.name} already exists`,
+      );
+    }
+
+    // Get admin role
+    const adminRole = await this.prisma.role.findUnique({
+      where: { name: 'admin' },
+    });
+
+    if (!adminRole) {
+      throw new NotFoundException(
+        'Admin role not found. Please run database seed first.',
+      );
+    }
+
+    // Use default password if not provided
+    const plainPassword =
+      createCompanyDto.adminPassword || this.getDefaultPassword();
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+    // Extract admin fields from DTO
+    const {
+      adminPassword: _adminPassword,
+      adminFirstName,
+      adminLastName,
+      ...companyData
+    } = createCompanyDto;
+
+    // Create company and admin user in transaction
+    const result = await this.prisma.$transaction(async (tx) => {
+      // 1. Create company
+      const company = await tx.company.create({
+        data: companyData,
+      });
+
+      // 2. Create admin user for this company
+      const adminUser = await tx.user.create({
+        data: {
+          email: createCompanyDto.email,
+          password: hashedPassword,
+          firstName: adminFirstName || 'Admin',
+          lastName: adminLastName || company.name,
+          companyId: company.id,
+          roleId: adminRole.id,
+          isActive: true,
+        },
+      });
+
+      return { company, adminUser, plainPassword };
+    });
+
+    // Fetch company with full details
+    const company = await this.findOne(result.company.id);
+
+    // Return with admin info (include temporary password only if auto-generated)
+    return {
+      ...company,
+      adminCreated: {
+        id: result.adminUser.id,
+        email: result.adminUser.email,
+        firstName: result.adminUser.firstName,
+        lastName: result.adminUser.lastName,
+        role: 'admin',
+        ...(createCompanyDto.adminPassword
+          ? {}
+          : { temporaryPassword: result.plainPassword }),
+      },
+    };
   }
 
   async findAll(page = 1, limit = 10, search?: string, status?: string) {
@@ -50,6 +131,19 @@ export class CompaniesService {
         skip,
         take: limit,
         include: {
+          region: {
+            include: {
+              parent: {
+                include: {
+                  parent: {
+                    include: {
+                      parent: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
           subscription: {
             include: {
               plan: true,
@@ -83,6 +177,19 @@ export class CompaniesService {
     const company = await this.prisma.company.findUnique({
       where: { id },
       include: {
+        region: {
+          include: {
+            parent: {
+              include: {
+                parent: {
+                  include: {
+                    parent: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         subscription: {
           include: {
             plan: true,
@@ -146,6 +253,19 @@ export class CompaniesService {
       where: { id },
       data: updateCompanyDto,
       include: {
+        region: {
+          include: {
+            parent: {
+              include: {
+                parent: {
+                  include: {
+                    parent: true,
+                  },
+                },
+              },
+            },
+          },
+        },
         subscription: {
           include: {
             plan: true,

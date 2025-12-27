@@ -30,6 +30,26 @@
       "key": "master_password",
       "value": "MasterAdmin123!",
       "type": "string"
+    },
+    {
+      "key": "employee_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "employee_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "staff_role_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "company_admin_token",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -467,9 +487,30 @@
                 },
                 {
                   "key": "email",
-                  "value": "contact@techindo.com",
+                  "value": "admin@techindo.com",
                   "type": "text",
-                  "description": "Company email (optional)"
+                  "description": "Admin email - will create admin user for this company (required)"
+                },
+                {
+                  "key": "adminPassword",
+                  "value": "Admin123!",
+                  "type": "text",
+                  "description": "Admin password - min 8 chars. Default: 'admin123' if not provided (optional)",
+                  "disabled": true
+                },
+                {
+                  "key": "adminFirstName",
+                  "value": "John",
+                  "type": "text",
+                  "description": "Admin first name (optional, default: 'Admin')",
+                  "disabled": true
+                },
+                {
+                  "key": "adminLastName",
+                  "value": "Doe",
+                  "type": "text",
+                  "description": "Admin last name (optional, default: company name)",
+                  "disabled": true
                 },
                 {
                   "key": "phone",
@@ -478,10 +519,34 @@
                   "description": "Company phone (optional)"
                 },
                 {
-                  "key": "address",
-                  "value": "Jl. Sudirman No. 123, Jakarta Pusat",
+                  "key": "regionId",
+                  "value": "31.71.06.1001",
                   "type": "text",
-                  "description": "Company address (optional)"
+                  "description": "Region ID from /regions/search autocomplete. Example: 31.71.06.1001 = Menteng, Jakarta Pusat (optional)"
+                },
+                {
+                  "key": "address",
+                  "value": "Jl. Sudirman No. 123, RT 01/RW 02",
+                  "type": "text",
+                  "description": "Detailed address - street, number, RT/RW (optional)"
+                },
+                {
+                  "key": "postalCode",
+                  "value": "10310",
+                  "type": "text",
+                  "description": "Postal code - override region's postal code (optional)"
+                },
+                {
+                  "key": "latitude",
+                  "value": "-6.175392",
+                  "type": "text",
+                  "description": "Latitude - override region's latitude (optional)"
+                },
+                {
+                  "key": "longitude",
+                  "value": "106.827153",
+                  "type": "text",
+                  "description": "Longitude - override region's longitude (optional)"
                 },
                 {
                   "key": "website",
@@ -493,7 +558,7 @@
                   "key": "status",
                   "value": "ACTIVE",
                   "type": "text",
-                  "description": "Company status: ACTIVE, TRIAL, SUSPENDED, INACTIVE (optional, default: TRIAL)"
+                  "description": "Company status: ACTIVE, TRIAL, SUSPENDED, INACTIVE (optional, default: ACTIVE)"
                 },
                 {
                   "key": "logo",
@@ -507,7 +572,7 @@
               "host": ["{{base_url}}"],
               "path": ["superadmin", "companies"]
             },
-            "description": "Create new company with optional logo upload.\n\n**Logo Requirements:**\n- Format: JPEG, PNG only\n- Max Size: 1MB (1048576 bytes)\n- Recommended: 200x200 - 500x500 px, square (1:1)\n- Optional field\n\n**Response will include logo URL** if uploaded:\n```json\n{\n  \"id\": \"uuid\",\n  \"name\": \"PT Technology Indonesia\",\n  \"logo\": \"http://localhost:3000/uploads/logos/logo-1703151234567-987654321.png\",\n  ...\n}\n```"
+            "description": "Create new company with admin user.\n\n**Auto-Create Admin User:**\n- Email (required) will be used to create admin user\n- Password: Default is 'admin123' (can be customized with adminPassword field)\n- Admin user has full access to manage the company\n- Admin can login immediately after company creation\n\n**Admin Fields (Optional):**\n- `adminPassword` - Custom password (default: 'admin123')\n- `adminFirstName` - Admin first name (default: 'Admin')\n- `adminLastName` - Admin last name (default: company name)\n\n**Logo Requirements:**\n- Format: JPEG, PNG only\n- Max Size: 1MB\n- Optional field\n\n**Response:**\n```json\n{\n  \"id\": \"uuid\",\n  \"name\": \"PT Technology Indonesia\",\n  \"email\": \"admin@techindo.com\",\n  \"adminCreated\": {\n    \"id\": \"user-uuid\",\n    \"email\": \"admin@techindo.com\",\n    \"firstName\": \"Admin\",\n    \"lastName\": \"PT Technology Indonesia\",\n    \"role\": \"admin\",\n    \"temporaryPassword\": \"admin123\"\n  }\n}\n```\n\n**Default Password:** `admin123`\n**Recommendation:** Change password after first login for better security."
           },
           "response": []
         },
@@ -654,10 +719,38 @@
                   "disabled": true
                 },
                 {
-                  "key": "address",
-                  "value": "Jl. New Address 456",
+                  "key": "regionId",
+                  "value": "32.73.01.1002",
                   "type": "text",
-                  "description": "Company address (optional)",
+                  "description": "Region ID from /regions/search autocomplete. Example: 32.73.01.1002 = Dago, Bandung (optional)",
+                  "disabled": true
+                },
+                {
+                  "key": "address",
+                  "value": "Jl. Dago No. 456, RT 05/RW 10",
+                  "type": "text",
+                  "description": "Detailed address - street, number, RT/RW (optional)",
+                  "disabled": true
+                },
+                {
+                  "key": "postalCode",
+                  "value": "40135",
+                  "type": "text",
+                  "description": "Postal code - override region's postal code (optional)",
+                  "disabled": true
+                },
+                {
+                  "key": "latitude",
+                  "value": "-6.880000",
+                  "type": "text",
+                  "description": "Latitude - override region's latitude (optional)",
+                  "disabled": true
+                },
+                {
+                  "key": "longitude",
+                  "value": "107.619100",
+                  "type": "text",
+                  "description": "Longitude - override region's longitude (optional)",
                   "disabled": true
                 },
                 {
@@ -1943,6 +2036,542 @@
         }
       ],
       "description": "**Payment Management untuk Subscription**\n\n**Payment Flow:**\n1. 📋 Create Subscription → Status: PENDING\n2. 💳 Create Payment → Status: PENDING, expires 24h\n3. ✅ Process Payment (Mock) → Payment: SUCCESS, Subscription: ACTIVE\n\n**Mock Payment Gateway:**\n- Untuk development/testing\n- Simulasi payment success tanpa payment gateway real\n- Nanti replace dengan webhook dari Midtrans/Xendit\n\n**Payment Methods Supported:**\n- Bank Transfer\n- Credit Card\n- E-Wallet (GoPay, OVO, Dana)\n- Virtual Account\n\n**Ready for Integration:**\n- 🔜 Midtrans integration\n- 🔜 Xendit integration\n- 🔜 Webhook handler\n- 🔜 Payment proof upload (manual transfer)"
+    },
+    {
+      "name": "Regions (Wilayah Indonesia)",
+      "item": [
+        {
+          "name": "1. Search Region (Autocomplete)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/regions/search?q=gondangwetan&limit=10",
+              "host": ["{{base_url}}"],
+              "path": ["regions", "search"],
+              "query": [
+                {
+                  "key": "q",
+                  "value": "gondangwetan",
+                  "description": "Search keyword (min 2 chars)"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Max results (default: 10)"
+                }
+              ]
+            },
+            "description": "**Modern Location Autocomplete**\n\nUser ketik nama lokasi → muncul suggestions dengan hierarchy lengkap.\n\n**Example:**\n- Query: `gondangwetan pasuruan`\n- Result: `GONDANGWETAN, KAB. PASURUAN, JAWA TIMUR`\n\n**Response:**\n```json\n[\n  {\n    \"id\": \"35.14.18.2001\",\n    \"fullName\": \"GONDANGWETAN, GONDANGWETAN, KAB. PASURUAN, JAWA TIMUR\",\n    \"village\": \"GONDANGWETAN\",\n    \"district\": \"GONDANGWETAN\",\n    \"city\": \"KAB. PASURUAN\",\n    \"province\": \"JAWA TIMUR\",\n    \"postalCode\": \"67174\"\n  }\n]\n```\n\n**Usage di Frontend:**\n1. User ketik di input\n2. Call API setiap 300ms (debounce)\n3. Tampilkan dropdown suggestions\n4. User klik → populate all address fields"
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get Region by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/regions/35.14.18.2001",
+              "host": ["{{base_url}}"],
+              "path": ["regions", "35.14.18.2001"]
+            },
+            "description": "Get region detail by ID with full hierarchy.\n\n**Response:**\n```json\n{\n  \"id\": \"35.14.18.2001\",\n  \"fullName\": \"GONDANGWETAN, GONDANGWETAN, KAB. PASURUAN, JAWA TIMUR\",\n  \"village\": \"GONDANGWETAN\",\n  \"district\": \"GONDANGWETAN\",\n  \"city\": \"KAB. PASURUAN\",\n  \"province\": \"JAWA TIMUR\",\n  \"postalCode\": \"67174\"\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get All Provinces",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/regions/list/provinces",
+              "host": ["{{base_url}}"],
+              "path": ["regions", "list", "provinces"]
+            },
+            "description": "Get all provinces (38 provinsi Indonesia).\n\n**Response:**\n```json\n[\n  { \"id\": \"11\", \"name\": \"ACEH\", \"level\": \"PROVINCE\" },\n  { \"id\": \"12\", \"name\": \"SUMATERA UTARA\", \"level\": \"PROVINCE\" },\n  ...\n]\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Children by Parent ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/regions/children/35",
+              "host": ["{{base_url}}"],
+              "path": ["regions", "children", "35"]
+            },
+            "description": "Get children regions by parent ID.\n\n**Examples:**\n- `/regions/children/35` → Semua Kab/Kota di Jawa Timur\n- `/regions/children/35.14` → Semua Kecamatan di Pasuruan\n- `/regions/children/35.14.18` → Semua Desa di Gondangwetan\n\n**Response:**\n```json\n[\n  { \"id\": \"35.01\", \"name\": \"KAB. PACITAN\", \"level\": \"CITY\" },\n  { \"id\": \"35.02\", \"name\": \"KAB. PONOROGO\", \"level\": \"CITY\" },\n  ...\n]\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Get Region Stats",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/regions/list/stats",
+              "host": ["{{base_url}}"],
+              "path": ["regions", "list", "stats"]
+            },
+            "description": "Get statistics of region data.\n\n**Response:**\n```json\n{\n  \"provinces\": 38,\n  \"cities\": 514,\n  \"districts\": 7230,\n  \"villages\": 83436,\n  \"total\": 91218\n}\n```"
+          },
+          "response": []
+        }
+      ],
+      "description": "**Wilayah Indonesia - Location Autocomplete**\n\n**Database:** 80.000+ kelurahan/desa Indonesia\n\n**Data Structure:**\n- Provinsi (38)\n- Kota/Kabupaten (514)\n- Kecamatan (7.230)\n- Kelurahan/Desa (83.436+)\n\n**Import Data:**\nData dari https://github.com/cahyadsn/wilayah\n\n**Kode Format:**\n- `35` = Jawa Timur (Provinsi)\n- `35.14` = Kab. Pasuruan (Kota/Kab)\n- `35.14.18` = Gondangwetan (Kecamatan)\n- `35.14.18.2001` = Desa Gondangwetan (Kelurahan/Desa)\n\n**Use Case:**\nModern location input - user ketik lokasi, muncul autocomplete, klik langsung populate semua field (provinsi, kota, kecamatan, desa, kode pos)."
+    },
+    {
+      "name": "Company - Employees",
+      "item": [
+        {
+          "name": "1. Create Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"employee_id\", jsonData.id);",
+                  "    pm.collectionVariables.set(\"employee_id\", jsonData.id);",
+                  "    ",
+                  "    console.log('✅ Employee created successfully');",
+                  "    console.log('Employee ID:', jsonData.id);",
+                  "    console.log('Employee Code:', jsonData.employeeCode);",
+                  "    console.log('Has Login Access:', jsonData.userId ? 'Yes' : 'No');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{company_admin_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "employeeCode",
+                  "value": "EMP001",
+                  "type": "text"
+                },
+                {
+                  "key": "firstName",
+                  "value": "John",
+                  "type": "text"
+                },
+                {
+                  "key": "lastName",
+                  "value": "Doe",
+                  "type": "text"
+                },
+                {
+                  "key": "email",
+                  "value": "john.doe@company.com",
+                  "type": "text"
+                },
+                {
+                  "key": "phone",
+                  "value": "+628123456789",
+                  "type": "text"
+                },
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "src": [],
+                  "description": "Upload employee photo (JPG, PNG, GIF, WebP - Max 5MB)"
+                },
+                {
+                  "key": "position",
+                  "value": "Software Engineer",
+                  "type": "text"
+                },
+                {
+                  "key": "department",
+                  "value": "IT",
+                  "type": "text"
+                },
+                {
+                  "key": "salary",
+                  "value": "15000000",
+                  "type": "text"
+                },
+                {
+                  "key": "joinDate",
+                  "value": "2024-01-15T00:00:00.000Z",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "type": "text"
+                },
+                {
+                  "key": "regionId",
+                  "value": "35.14.18.2007",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "Jl. Raya Gondangwetan No. 123",
+                  "type": "text"
+                },
+                {
+                  "key": "postalCode",
+                  "value": "67153",
+                  "type": "text"
+                },
+                {
+                  "key": "roleId",
+                  "value": "{{staff_role_id}}",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/company/employees",
+              "host": ["{{base_url}}"],
+              "path": ["company", "employees"]
+            },
+            "description": "Create a new employee with optional photo upload.\n\n**Content-Type:** `multipart/form-data`\n\n**Note:** Employee is created WITHOUT login access. Use \"Grant Login Access\" endpoint to give them login capability.\n\n**Required fields:**\n- `employeeCode` - Unique employee code (e.g., EMP001)\n- `firstName` - Employee first name\n- `lastName` - Employee last name\n- `email` - Employee email (unique per company)\n\n**Optional fields:**\n- `phone` - Phone number\n- `photo` - Photo file (JPG, PNG, GIF, WebP - Max 5MB). Upload as file, not path!\n- `position` - Job position\n- `department` - Department name\n- `salary` - Monthly salary (as string: \"15000000\")\n- `joinDate` - Join date (ISO DateTime format: YYYY-MM-DDTHH:mm:ss.sssZ)\n- `status` - ACTIVE | INACTIVE | ON_LEAVE | TERMINATED (default: ACTIVE)\n- `regionId` - Region ID (e.g., \"35.14.18.2007\" for Wonosari village). Get from /regions endpoints\n- `address` - Detail address (street, RT/RW, etc)\n- `postalCode` - Postal code\n- `roleId` - Role ID (use {{staff_role_id}} variable)\n\n**Photo Upload & Processing:**\n1. Select file in Postman (click \"Select Files\")\n2. Choose image file (JPG, PNG, GIF, WebP)\n3. Max file size: 5MB\n4. **Auto Processing:**\n   - Resized to max 800x800px (maintains aspect ratio)\n   - Converted to WebP format (smaller size, better quality)\n   - Compressed with 85% quality\n   - EXIF data removed\n5. Saved to `/uploads/employees/` with format: `employee-{timestamp}-{random}.webp`\n6. Response includes photo path\n\n**How to get regionId:**\n1. GET /regions/list/provinces - Get province list\n2. GET /regions/children/{provinceId} - Get cities/regencies\n3. GET /regions/children/{cityId} - Get districts\n4. GET /regions/children/{districtId} - Get villages\n5. Use the village/district ID as regionId\n\n**Response with Full Region Hierarchy:**\n```json\n{\n  \"id\": \"uuid\",\n  \"employeeCode\": \"EMP001\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@company.com\",\n  \"photo\": \"/uploads/employees/employee-1640000000000-123456789.webp\",\n  \"position\": \"Software Engineer\",\n  \"department\": \"IT\",\n  \"salary\": \"15000000\",\n  \"status\": \"ACTIVE\",\n  \"regionId\": \"35.14.18.2007\",\n  \"region\": {\n    \"id\": \"35.14.18.2007\",\n    \"name\": \"Wonosari\",\n    \"level\": \"VILLAGE\",\n    \"parentId\": \"35.14.18\",\n    \"parent\": {\n      \"id\": \"35.14.18\",\n      \"name\": \"Gondangwetan\",\n      \"level\": \"DISTRICT\",\n      \"parentId\": \"35.14\",\n      \"parent\": {\n        \"id\": \"35.14\",\n        \"name\": \"Kabupaten Pasuruan\",\n        \"level\": \"CITY\",\n        \"parentId\": \"35\",\n        \"parent\": {\n          \"id\": \"35\",\n          \"name\": \"Jawa Timur\",\n          \"level\": \"PROVINCE\",\n          \"parentId\": null\n        }\n      }\n    }\n  },\n  \"address\": \"Jl. Raya Gondangwetan No. 123\",\n  \"postalCode\": \"67153\",\n  \"userId\": null,\n  \"companyId\": \"uuid\",\n  \"roleId\": \"staff\",\n  \"role\": { \"id\": \"staff\", \"name\": \"Staff\" },\n  \"company\": { \"name\": \"PT Example\" }\n}\n```\n\n**Display Address:**\nFrom region hierarchy: \"Wonosari, Gondangwetan, Kabupaten Pasuruan, Jawa Timur\"\nFull address: \"Jl. Raya Gondangwetan No. 123, Wonosari, Gondangwetan, Kab. Pasuruan, Jawa Timur 67153\""
+          },
+          "response": []
+        },
+        {
+          "name": "2. Get All Employees",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{company_admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/company/employees?page=1&limit=10&search=john&status=ACTIVE&department=IT",
+              "host": ["{{base_url}}"],
+              "path": ["company", "employees"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number (default: 1)"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Items per page (default: 10)"
+                },
+                {
+                  "key": "search",
+                  "value": "john",
+                  "description": "Search in name, email, code, position",
+                  "disabled": true
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "description": "Filter by status",
+                  "disabled": true
+                },
+                {
+                  "key": "department",
+                  "value": "IT",
+                  "description": "Filter by department",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Get all employees with pagination, search, and filters.\n\n**Query Parameters:**\n- `page` - Page number (default: 1)\n- `limit` - Items per page (default: 10)\n- `search` - Search in firstName, lastName, email, employeeCode, position\n- `status` - Filter by ACTIVE | INACTIVE | ON_LEAVE | TERMINATED\n- `department` - Filter by department name\n\n**Response:**\n```json\n{\n  \"data\": [\n    {\n      \"id\": \"uuid\",\n      \"employeeCode\": \"EMP001\",\n      \"firstName\": \"John\",\n      \"lastName\": \"Doe\",\n      \"email\": \"john.doe@company.com\",\n      \"position\": \"Software Engineer\",\n      \"department\": \"IT\",\n      \"status\": \"ACTIVE\",\n      \"role\": { \"name\": \"Staff\" },\n      \"company\": { \"name\": \"PT Example\" }\n    }\n  ],\n  \"meta\": {\n    \"total\": 1,\n    \"page\": 1,\n    \"limit\": 10,\n    \"totalPages\": 1\n  }\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "3. Get Employee Stats",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{company_admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/company/employees/stats",
+              "host": ["{{base_url}}"],
+              "path": ["company", "employees", "stats"]
+            },
+            "description": "Get employee statistics for the company.\n\n**Response:**\n```json\n{\n  \"total\": 15,\n  \"byStatus\": {\n    \"active\": 12,\n    \"inactive\": 1,\n    \"onLeave\": 2,\n    \"terminated\": 0\n  },\n  \"byDepartment\": [\n    { \"department\": \"IT\", \"count\": 5 },\n    { \"department\": \"HR\", \"count\": 3 },\n    { \"department\": \"Finance\", \"count\": 4 },\n    { \"department\": \"Sales\", \"count\": 3 }\n  ]\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "4. Get Employee by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{company_admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/company/employees/:id",
+              "host": ["{{base_url}}"],
+              "path": ["company", "employees", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{employee_id}}",
+                  "description": "Employee ID"
+                }
+              ]
+            },
+            "description": "Get employee details by ID.\n\n**Response:**\n```json\n{\n  \"id\": \"uuid\",\n  \"employeeCode\": \"EMP001\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"email\": \"john.doe@company.com\",\n  \"phone\": \"+628123456789\",\n  \"position\": \"Software Engineer\",\n  \"department\": \"IT\",\n  \"salary\": \"15000000\",\n  \"joinDate\": \"2024-01-15T00:00:00.000Z\",\n  \"status\": \"ACTIVE\",\n  \"role\": { \"id\": \"staff\", \"name\": \"Staff\" },\n  \"company\": { \"id\": \"uuid\", \"name\": \"PT Example\" },\n  \"projectTasks\": []\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "5. Update Employee",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{company_admin_token}}",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "photo",
+                  "type": "file",
+                  "src": [],
+                  "description": "Upload new employee photo (Optional - JPG, PNG, GIF, WebP - Max 5MB)"
+                },
+                {
+                  "key": "position",
+                  "value": "Senior Software Engineer",
+                  "type": "text"
+                },
+                {
+                  "key": "salary",
+                  "value": "20000000",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "type": "text"
+                },
+                {
+                  "key": "regionId",
+                  "value": "35.14.18.2007",
+                  "type": "text"
+                },
+                {
+                  "key": "address",
+                  "value": "Jl. Raya Gondangwetan No. 456",
+                  "type": "text"
+                },
+                {
+                  "key": "postalCode",
+                  "value": "67153",
+                  "type": "text"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/company/employees/:id",
+              "host": ["{{base_url}}"],
+              "path": ["company", "employees", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{employee_id}}",
+                  "description": "Employee ID"
+                }
+              ]
+            },
+            "description": "Update employee information with optional photo upload. All fields are optional.\n\n**Content-Type:** `multipart/form-data`\n\n**Updatable fields:**\n- `employeeCode` - Employee code (must be unique per company)\n- `firstName` - First name\n- `lastName` - Last name\n- `email` - Email (must be unique per company)\n- `phone` - Phone number\n- `photo` - Photo file upload (JPG, PNG, GIF, WebP - Max 5MB). Will replace existing photo.\n- `position` - Job position\n- `department` - Department\n- `salary` - Monthly salary (as string)\n- `joinDate` - Join date (ISO DateTime)\n- `status` - ACTIVE | INACTIVE | ON_LEAVE | TERMINATED\n- `regionId` - Region ID (from /regions endpoints)\n- `address` - Detail address\n- `postalCode` - Postal code\n- `roleId` - Role ID\n\n**Photo Upload & Processing:**\n- Select new photo file to replace existing one\n- Leave empty to keep existing photo\n- Supports: JPG, PNG, GIF, WebP\n- Max size: 5MB\n- **Auto Processing:**\n  - Resized to max 800x800px (maintains aspect ratio)\n  - Converted to WebP format (smaller size, better quality)\n  - Compressed with 85% quality\n  - EXIF data removed\n  - Old photo automatically deleted when new photo uploaded\n\n**Response with Full Region Hierarchy:**\n```json\n{\n  \"id\": \"uuid\",\n  \"employeeCode\": \"EMP001\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"photo\": \"/uploads/employees/employee-1640000000000-987654321.webp\",\n  \"position\": \"Senior Software Engineer\",\n  \"salary\": \"20000000\",\n  \"status\": \"ACTIVE\",\n  \"region\": {\n    \"id\": \"35.14.18.2007\",\n    \"name\": \"Wonosari\",\n    \"level\": \"VILLAGE\",\n    \"parent\": {\n      \"id\": \"35.14.18\",\n      \"name\": \"Gondangwetan\",\n      \"level\": \"DISTRICT\",\n      \"parent\": {\n        \"id\": \"35.14\",\n        \"name\": \"Kabupaten Pasuruan\",\n        \"level\": \"CITY\",\n        \"parent\": {\n          \"id\": \"35\",\n          \"name\": \"Jawa Timur\",\n          \"level\": \"PROVINCE\"\n        }\n      }\n    }\n  },\n  \"address\": \"Jl. Raya Gondangwetan No. 456\",\n  \"postalCode\": \"67153\",\n  ...\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "6. Delete Employee",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{company_admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/company/employees/:id",
+              "host": ["{{base_url}}"],
+              "path": ["company", "employees", ":id"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{employee_id}}",
+                  "description": "Employee ID"
+                }
+              ]
+            },
+            "description": "Delete an employee from the company.\n\n**Note:** This is a hard delete. Consider using status update to TERMINATED instead for soft delete.\n\n**Response:**\n```json\n{\n  \"id\": \"uuid\",\n  \"employeeCode\": \"EMP001\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"deletedAt\": \"2024-01-20T10:30:00.000Z\"\n}\n```"
+          },
+          "response": []
+        },
+        {
+          "name": "7. Grant Login Access",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    console.log('✅ Login access granted successfully');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{company_admin_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"Employee123!\",\n  \"roleId\": \"{{staff_role_id}}\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/company/employees/:id/grant-access",
+              "host": ["{{base_url}}"],
+              "path": ["company", "employees", ":id", "grant-access"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{employee_id}}",
+                  "description": "Employee ID"
+                }
+              ]
+            },
+            "description": "Grant login access to an employee by creating a User account linked to the Employee.\n\n**Request Body:**\n```json\n{\n  \"password\": \"Employee123!\",\n  \"roleId\": \"uuid-of-role\"\n}\n```\n\n**Password Requirements:**\n- Minimum 8 characters\n- At least 1 uppercase letter\n- At least 1 lowercase letter\n- At least 1 number\n- At least 1 special character (@$!%*?&)\n\n**Validations:**\n- Employee must exist and belong to your company\n- Employee must NOT already have login access\n- Email must not be used by another user\n- Role must exist and NOT be superadmin role\n\n**Response:**\n```json\n{\n  \"message\": \"Login access granted successfully\",\n  \"employee\": {\n    \"id\": \"uuid\",\n    \"employeeCode\": \"EMP001\",\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@company.com\",\n    \"hasAccess\": true\n  }\n}\n```\n\n**What happens:**\n1. Creates User account with hashed password\n2. Links User to Employee (Employee.userId)\n3. Employee can now login using their email and password\n4. JWT token will include employeeId and employee data\n\n**Common Errors:**\n- `409 Conflict` - Employee already has login access\n- `409 Conflict` - Email already used by another user\n- `404 Not Found` - Role not found\n- `400 Bad Request` - Cannot grant superadmin roles to employees"
+          },
+          "response": []
+        },
+        {
+          "name": "8. Revoke Login Access",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    console.log('✅ Login access revoked successfully');",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{company_admin_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/company/employees/:id/revoke-access",
+              "host": ["{{base_url}}"],
+              "path": ["company", "employees", ":id", "revoke-access"],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "{{employee_id}}",
+                  "description": "Employee ID"
+                }
+              ]
+            },
+            "description": "Revoke login access from an employee by deleting their User account.\n\n**Validations:**\n- Employee must exist and belong to your company\n- Employee must HAVE login access\n\n**Response:**\n```json\n{\n  \"message\": \"Login access revoked successfully\",\n  \"employee\": {\n    \"id\": \"uuid\",\n    \"employeeCode\": \"EMP001\",\n    \"name\": \"John Doe\",\n    \"email\": \"john.doe@company.com\",\n    \"hasAccess\": false\n  }\n}\n```\n\n**What happens:**\n1. Deletes User account\n2. Employee.userId set to null automatically\n3. Employee data remains intact (name, email, position, salary, etc)\n4. Employee can no longer login\n5. Any active tokens for this employee become invalid\n\n**Use Cases:**\n- Employee terminated - revoke access immediately\n- Security breach - revoke access while investigating\n- Role change - revoke then grant with new role\n- Temporary suspension - revoke access, grant later\n\n**Note:** This does NOT delete the employee record. To remove employee completely, use Delete Employee endpoint.\n\n**Common Errors:**\n- `404 Not Found` - Employee not found\n- `400 Bad Request` - Employee does not have login access"
+          },
+          "response": []
+        },
+        {
+          "name": "9. Login as Employee",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"employee_token\", jsonData.access_token);",
+                  "    pm.collectionVariables.set(\"employee_token\", jsonData.access_token);",
+                  "    ",
+                  "    console.log('✅ Employee logged in successfully');",
+                  "    console.log('Employee Code:', jsonData.user.employeeCode);",
+                  "    console.log('Position:', jsonData.user.position);",
+                  "    console.log('Department:', jsonData.user.department);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"john.doe@company.com\",\n  \"password\": \"Employee123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login"]
+            },
+            "description": "Login as an employee who has been granted login access.\n\n**Prerequisites:**\n1. Employee must be created\n2. Employee must have been granted login access (via Grant Login Access endpoint)\n\n**Request Body:**\n```json\n{\n  \"email\": \"employee@company.com\",\n  \"password\": \"Employee123!\"\n}\n```\n\n**Response includes employee data:**\n```json\n{\n  \"access_token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"user\": {\n    \"id\": \"user-uuid\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"email\": \"john.doe@company.com\",\n    \"role\": \"staff\",\n    \"company\": \"PT Example Company\",\n    \"employeeCode\": \"EMP001\",\n    \"position\": \"Marketing Manager\",\n    \"department\": \"Marketing\",\n    \"isSuperAdmin\": false,\n    \"isSuperAdminMaster\": false\n  }\n}\n```\n\n**JWT Payload includes:**\n- `sub` - User ID\n- `email` - User email\n- `roleId` - Role ID\n- `companyId` - Company ID\n- `employeeId` - Employee ID (NEW!)\n- `isSuperAdmin` - false\n- `isSuperAdminMaster` - false\n\n**Errors:**\n- `401 Unauthorized` - Invalid credentials (wrong email/password)\n- `401 Unauthorized` - Employee has no login access (User not created)\n- `401 Unauthorized` - Account is inactive (User.isActive = false)"
+          },
+          "response": []
+        }
+      ],
+      "description": "**Employee Management with Login Access**\n\n**Features:**\n- Create, read, update, delete employees\n- Grant/revoke login access to employees\n- Employee statistics (by status, by department)\n- Search and filter employees\n- Pagination support\n- Employee login with full authentication\n- Employee address with Region integration\n\n**Employee Status:**\n- `ACTIVE` - Currently working\n- `INACTIVE` - Temporarily inactive\n- `ON_LEAVE` - On leave (cuti, sick leave, etc)\n- `TERMINATED` - Employment terminated\n\n**Address Fields:**\n- `regionId` - Region ID (Province/City/District/Village)\n- `address` - Detail address (street, RT/RW, etc)\n- `postalCode` - Postal code\n\n**How to use Address:**\n1. User select region using `/regions` endpoints (autocomplete)\n2. Save selected region ID to `regionId`\n3. User input detail address (street, house number, RT/RW)\n4. Response includes full region data (province, city, district, village)\n\n**Login Access Flow:**\n1. Create Employee (no login access)\n2. Grant Access (creates User account linked to Employee)\n3. Employee can login with email/password\n4. (Optional) Revoke Access (deletes User, keeps Employee data)\n\n**Architecture:**\n- `Employee` = HR data master (gaji, posisi, department, alamat)\n- `User` = Login credential (email, password, role)\n- Relation: Employee → User (optional, one-to-one)\n- Relation: Employee → Region (optional, for address)\n\n**Use Cases:**\n- Office staff (admin, marketing, sales) → Grant access\n- Security/cleaning service → Don't grant access (data only)\n- Terminated employee → Revoke access (preserve HR data)\n\n**Authentication:**\nAll endpoints require company admin/staff token.\n\n**Authorization:**\nEmployees are scoped to the company of the authenticated user.\n\n**See Also:**\n- EMPLOYEE_LOGIN_GUIDE.md for complete documentation\n- `/regions` endpoints for address autocomplete"
     }
   ]
 }

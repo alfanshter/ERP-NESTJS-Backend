@@ -23,6 +23,7 @@ export class AuthService {
       include: {
         role: true,
         company: true,
+        employee: true, // Include employee data if user is linked to employee
       },
     });
 
@@ -39,6 +40,12 @@ export class AuthService {
       throw new UnauthorizedException('Account is inactive');
     }
 
+    // Update last login
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { lastLoginAt: new Date() },
+    });
+
     const { password: _, ...result } = user;
     return result;
   }
@@ -51,6 +58,7 @@ export class AuthService {
       email: user.email,
       roleId: user.roleId,
       companyId: user.companyId,
+      employeeId: user.employee?.id || null,
       isSuperAdmin:
         user.role.name === 'superadmin-staff' ||
         user.role.name === 'superadmin-master',
@@ -66,6 +74,9 @@ export class AuthService {
         email: user.email,
         role: user.role.name,
         company: user.company?.name || null,
+        employeeCode: user.employee?.employeeCode || null,
+        position: user.employee?.position || null,
+        department: user.employee?.department || null,
         isSuperAdmin:
           user.role.name === 'superadmin-staff' ||
           user.role.name === 'superadmin-master',

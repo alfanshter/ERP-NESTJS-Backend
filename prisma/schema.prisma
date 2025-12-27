@@ -7,6 +7,35 @@ datasource db {
   provider = "postgresql"
 }
 
+// ==================== REGION / WILAYAH INDONESIA ====================
+
+model Region {
+  id         String      @id // Kode wilayah (misal: "35.14.18.2001")
+  name       String      // Nama wilayah
+  level      RegionLevel // PROVINCE, CITY, DISTRICT, VILLAGE
+  parentId   String?     // Parent region id (null untuk province)
+  parent     Region?     @relation("RegionHierarchy", fields: [parentId], references: [id])
+  children   Region[]    @relation("RegionHierarchy")
+  postalCode String?     // Kode pos (untuk village)
+  latitude   Float?      // Koordinat (opsional)
+  longitude  Float?      // Koordinat (opsional)
+
+  // Relations
+  companies  Company[]   // Companies using this region
+  employees  Employee[]  // Employees using this region
+
+  @@index([name])
+  @@index([level])
+  @@index([parentId])
+}
+
+enum RegionLevel {
+  PROVINCE // Provinsi
+  CITY     // Kota/Kabupaten
+  DISTRICT // Kecamatan
+  VILLAGE  // Kelurahan/Desa
+}
+
 // ==================== CORE MODELS ====================
 
 model Company {
@@ -14,7 +43,14 @@ model Company {
   name             String         @unique
   email            String?
   phone            String?
-  address          String?
+  // Location - using Region relation
+  regionId         String?        // Region ID from autocomplete (e.g., "35.14.18.2007")
+  region           Region?        @relation(fields: [regionId], references: [id])
+  address          String?        // Alamat detail (jalan, nomor, RT/RW)
+  postalCode       String?        // Kode pos (optional override, or use region's)
+  latitude         Float?         // Koordinat latitude (optional override)
+  longitude        Float?         // Koordinat longitude (optional override)
+  // Company info
   logo             String?
   website          String?
   status           CompanyStatus  @default(ACTIVE)
@@ -28,6 +64,8 @@ model Company {
   expenses         Expense[]
   createdAt        DateTime       @default(now())
   updatedAt        DateTime       @updatedAt
+
+  @@index([regionId])
 }
 
 enum CompanyStatus {
@@ -64,8 +102,9 @@ model User {
   isActive    Boolean   @default(true)
   companyId   String?
   roleId      String
-  company     Company?  @relation(fields: [companyId], references: [id])
+  company     Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   role        Role      @relation(fields: [roleId], references: [id])
+  employee    Employee? // Relasi one-to-one dengan Employee
   lastLoginAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
@@ -171,24 +210,34 @@ model Employee {
   employeeCode String           @unique
   firstName    String
   lastName     String
-  email        String
+  email        String           @unique
   phone        String?
-  avatar       String?
+  avatar       String?          // Deprecated: use photo instead
+  photo        String?          // Photo/profile picture path
   position     String?
   department   String?
   joinDate     DateTime         @default(now())
   salary       Float?
   status       EmployeeStatus   @default(ACTIVE)
+  // Address - using Region relation (sama seperti User & Company)
+  regionId     String?          // Region ID from autocomplete (e.g., "35.14.18.2007")
+  region       Region?          @relation(fields: [regionId], references: [id])
+  address      String?          // Alamat detail (jalan, nomor, RT/RW)
+  postalCode   String?          // Kode pos
   companyId    String
   roleId       String
-  company      Company          @relation(fields: [companyId], references: [id])
+  company      Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
   role         Role             @relation(fields: [roleId], references: [id])
+  userId       String?          @unique // Relasi optional ke User (untuk yang perlu login)
+  user         User?            @relation(fields: [userId], references: [id], onDelete: SetNull)
   projectTasks ProjectTask[]
   createdAt    DateTime         @default(now())
   updatedAt    DateTime         @updatedAt
 
   @@index([companyId])
   @@index([email])
+  @@index([userId])
+  @@index([regionId])
 }
 
 enum EmployeeStatus {
@@ -211,7 +260,7 @@ model Project {
   startDate   DateTime?
   endDate     DateTime?
   companyId   String
-  company     Company       @relation(fields: [companyId], references: [id])
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   tasks       ProjectTask[]
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -279,7 +328,7 @@ model Procurement {
   requestDate     DateTime          @default(now())
   requiredDate    DateTime?
   companyId       String
-  company         Company           @relation(fields: [companyId], references: [id])
+  company         Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
   items           ProcurementItem[]
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -329,7 +378,7 @@ model Invoice {
   dueDate       DateTime?
   paidDate      DateTime?
   companyId     String
-  company       Company       @relation(fields: [companyId], references: [id])
+  company       Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
 
@@ -354,7 +403,7 @@ model Expense {
   receipt     String?
   expenseDate DateTime      @default(now())
   companyId   String
-  company     Company       @relation(fields: [companyId], references: [id])
+  company     Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
 
